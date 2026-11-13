@@ -1,0 +1,2484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SLIPGATE//KIT — vkQuake Starter Kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#120d09; --bg2:#1a130d; --surface:#211812; --surface2:#2a1e15; --overlay:#180f0a;
+  --line:#3d2b1d; --line2:#55391f;
+  --ink:#efe4cf; --mut:#a8977f; --dim:#7a6b56;
+  --lava:#ff6b1a; --ember:#ffb347; --acid:#37e0a1; --blood:#ff4d4d; --steel:#5aa7ff; --rune:#b07aff;
+  --ok:#37e0a1; --warn:#ffb347; --danger:#ff4d4d; --info:#5aa7ff;
+  --disp:'Chakra Petch',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace; --body:'IBM Plex Sans',system-ui,sans-serif;
+  --nav:64px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15.5px;line-height:1.6;overflow-x:hidden}
+::selection{background:var(--lava);color:#1a0d02}
+*{scrollbar-width:thin;scrollbar-color:#5a3a22 #17110c}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:#17110c}
+::-webkit-scrollbar-thumb{background:#5a3a22;border:2px solid #17110c;border-radius:6px}
+::-webkit-scrollbar-thumb:hover{background:var(--lava)}
+a{color:var(--steel);text-decoration:none}
+a:hover{text-decoration:underline}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--ember);outline-offset:2px}
+canvas#embers{position:fixed;inset:0;z-index:0;pointer-events:none}
+.grain{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.055;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
+.vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 120% 90% at 50% 0%,transparent 55%,rgba(8,4,2,.55) 100%)}
+.wrap{position:relative;z-index:3;max-width:1240px;margin:0 auto;padding:0 24px}
+/* ---------- NAV ---------- */
+nav{position:fixed;top:0;left:0;right:0;height:var(--nav);z-index:50;display:flex;align-items:center;gap:18px;padding:0 22px;background:rgba(18,13,9,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--disp);font-weight:700;font-size:17px;letter-spacing:.06em;color:var(--ink);white-space:nowrap}
+.brand:hover{text-decoration:none}
+.brand svg{filter:drop-shadow(0 0 6px rgba(255,107,26,.7))}
+.brand em{font-style:normal;color:var(--lava)}
+.navlinks{display:flex;gap:4px;margin-left:8px;overflow-x:auto;scrollbar-width:none}
+.navlinks::-webkit-scrollbar{display:none}
+.navlinks a{font-family:var(--disp);font-size:12.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);padding:8px 12px;border-radius:6px;white-space:nowrap}
+.navlinks a:hover{color:var(--ink);text-decoration:none;background:rgba(255,107,26,.08)}
+.navlinks a.active{color:var(--ember);background:rgba(255,107,26,.13);box-shadow:inset 0 -2px 0 var(--lava)}
+.navright{margin-left:auto;display:flex;gap:10px;align-items:center}
+.sndbtn{display:flex;align-items:center;gap:7px;background:transparent;border:1px solid var(--line2);color:var(--mut);font-family:var(--disp);font-size:11px;font-weight:600;letter-spacing:.08em;padding:8px 12px;border-radius:7px;transition:.2s}
+.sndbtn:hover{color:var(--ink);border-color:var(--ember)}
+.sndbtn .dot{width:8px;height:8px;border-radius:50%;background:var(--acid);box-shadow:0 0 8px var(--acid)}
+.sndbtn.off .dot{background:var(--dim);box-shadow:none}
+.btn{display:inline-flex;align-items:center;gap:9px;font-family:var(--disp);font-weight:700;letter-spacing:.05em;border:none;border-radius:8px;padding:11px 20px;font-size:14px;transition:transform .15s,box-shadow .2s,filter .2s}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn-primary{background:linear-gradient(120deg,var(--lava),var(--ember));color:#221002;box-shadow:0 4px 22px rgba(255,107,26,.35)}
+.btn-primary:hover{filter:brightness(1.1);box-shadow:0 6px 30px rgba(255,107,26,.5)}
+.btn-ghost{background:transparent;border:1px solid var(--line2);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--ember);background:rgba(255,107,26,.07)}
+.btn-sm{padding:7px 13px;font-size:12px;border-radius:6px}
+/* ---------- HERO ---------- */
+header{position:relative;padding:calc(var(--nav) + 74px) 0 60px;overflow:hidden}
+.hero-ring{position:absolute;right:-140px;top:30px;width:560px;height:560px;opacity:.14;animation:spin 90s linear infinite;pointer-events:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.herogrid{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}
+.eyebrow{font-family:var(--disp);font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--acid);display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.eyebrow::before{content:"";width:26px;height:2px;background:linear-gradient(90deg,var(--acid),var(--steel))}
+h1{font-family:var(--disp);font-weight:700;font-size:clamp(38px,5.2vw,64px);line-height:1.02;letter-spacing:-.01em;text-transform:uppercase}
+h1 .grad{background:linear-gradient(100deg,var(--lava) 10%,var(--ember) 55%,var(--rune) 110%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{color:var(--mut);font-size:16.5px;max-width:56ch;margin:20px 0 28px}
+.lede b{color:var(--ink);font-weight:600}
+.ctas{display:flex;gap:14px;flex-wrap:wrap}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:34px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:10px 16px;min-width:104px}
+.stat b{display:block;font-family:var(--disp);font-size:22px;font-weight:700;color:var(--ember)}
+.stat span{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.stat:nth-child(2) b{color:var(--acid)}.stat:nth-child(3) b{color:var(--steel)}.stat:nth-child(4) b{color:var(--rune)}
+.term{background:#150e08;border:1px solid var(--line2);border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,107,26,.06),0 0 44px rgba(255,107,26,.07);overflow:hidden}
+.term-bar{display:flex;align-items:center;gap:8px;padding:11px 15px;border-bottom:1px solid var(--line);background:var(--surface)}
+.term-bar i{width:11px;height:11px;border-radius:50%;display:block}
+.term-bar i:nth-child(1){background:var(--blood)}.term-bar i:nth-child(2){background:var(--ember)}.term-bar i:nth-child(3){background:var(--acid)}
+.term-bar span{margin-left:8px;font-family:var(--mono);font-size:11.5px;color:var(--dim)}
+.term-body{padding:18px 18px 22px;font-family:var(--mono);font-size:12.8px;line-height:1.85;min-height:264px;color:#cdbfa4}
+.term-body .p{color:var(--acid)}.term-body .ok{color:var(--acid)}.term-body .hl{color:var(--ember)}.term-body .cm{color:var(--dim)}
+.caret{display:inline-block;width:8px;height:15px;background:var(--ember);vertical-align:-2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+/* ---------- SECTIONS ---------- */
+section{padding:74px 0;scroll-margin-top:calc(var(--nav) + 14px);position:relative}
+.sec-head{margin-bottom:30px}
+.sec-head .eyebrow{margin-bottom:10px}
+h2{font-family:var(--disp);font-weight:700;font-size:clamp(26px,3vw,36px);text-transform:uppercase;letter-spacing:.01em}
+.sec-head p{color:var(--mut);max-width:72ch;margin-top:10px}
+#workbench .eyebrow{color:var(--ember)}#workbench .eyebrow::before{background:linear-gradient(90deg,var(--lava),var(--ember))}
+#tuning .eyebrow{color:var(--acid)}#tuning .eyebrow::before{background:linear-gradient(90deg,var(--acid),var(--steel))}
+#setup .eyebrow{color:var(--steel)}#setup .eyebrow::before{background:linear-gradient(90deg,var(--steel),var(--rune))}
+#prompts .eyebrow{color:var(--rune)}#prompts .eyebrow::before{background:linear-gradient(90deg,var(--rune),var(--blood))}
+.rv{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease;transition-delay:var(--d,0s)}
+.rv.on{opacity:1;transform:none}
+/* ---------- WORKBENCH ---------- */
+.wb{background:var(--overlay);border:1px solid var(--line2);border-radius:14px;overflow:hidden;box-shadow:0 30px 70px rgba(0,0,0,.45)}
+.wb-top{display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.wb-title{font-family:var(--disp);font-weight:700;font-size:13px;letter-spacing:.14em;color:var(--ember)}
+.wb-search{flex:1;min-width:180px;max-width:340px;position:relative}
+.wb-search input{width:100%;background:#150e08;border:1px solid var(--line2);color:var(--ink);font-family:var(--mono);font-size:12.5px;padding:8px 12px 8px 32px;border-radius:7px}
+.wb-search input::placeholder{color:var(--dim)}
+.wb-search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.5}
+.wb-count{font-family:var(--mono);font-size:11.5px;color:var(--dim);margin-left:auto}
+.wb-body{display:grid;grid-template-columns:280px 1fr;min-height:520px}
+.tree{border-right:1px solid var(--line);background:#160f09;padding:10px 8px;overflow-y:auto;max-height:640px}
+.tgroup{margin-bottom:4px}
+.tgroup>button{width:100%;display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--mut);font-family:var(--disp);font-size:11.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:7px 8px;border-radius:6px}
+.tgroup>button:hover{color:var(--ember);background:rgba(255,107,26,.06)}
+.tgroup>button .arr{transition:transform .2s;font-size:9px}
+.tgroup.closed .arr{transform:rotate(-90deg)}
+.tgroup.closed .titems{display:none}
+.titem{width:100%;display:flex;align-items:center;gap:9px;background:none;border:none;color:#c9bba0;font-family:var(--mono);font-size:12.3px;padding:6px 8px 6px 20px;border-radius:6px;text-align:left;transition:.15s}
+.titem:hover{background:rgba(255,179,71,.07);color:var(--ink)}
+.titem.active{background:linear-gradient(90deg,rgba(255,107,26,.18),rgba(255,107,26,.05));color:var(--ember);box-shadow:inset 2px 0 0 var(--lava)}
+.titem .ic{font-size:11px;width:16px;text-align:center;flex:none}
+.titem .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.titem .mod{margin-left:auto;width:7px;height:7px;border-radius:50%;background:var(--acid);box-shadow:0 0 6px var(--acid);flex:none}
+.ic-qc{color:var(--ember)}.ic-md{color:var(--steel)}.ic-sh{color:var(--acid)}.ic-map{color:var(--lava)}.ic-bin{color:var(--rune)}.ic-cfg{color:var(--dim)}
+.viewer{display:flex;flex-direction:column;min-width:0}
+.vw-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:#1b130c;flex-wrap:wrap}
+.vw-path{font-family:var(--mono);font-size:12.8px;color:var(--ink)}
+.badge{font-family:var(--disp);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:5px;border:1px solid var(--line2);color:var(--mut)}
+.badge.lang{color:var(--ember);border-color:#6b4520}
+.badge.edited{color:var(--acid);border-color:#1f6b4e}
+.vw-actions{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap}
+.vbtn{background:var(--surface2);border:1px solid var(--line2);color:var(--mut);font-family:var(--disp);font-size:11px;font-weight:600;letter-spacing:.06em;padding:6px 11px;border-radius:6px;transition:.15s}
+.vbtn:hover{color:var(--ink);border-color:var(--ember)}
+.vbtn.hot{color:var(--acid);border-color:#1f6b4e}
+.code-wrap{flex:1;display:flex;overflow:auto;max-height:560px;background:#140d07;position:relative}
+.gutter{flex:none;padding:14px 0;text-align:right;font-family:var(--mono);font-size:12.3px;line-height:1.7;color:#54432e;user-select:none;border-right:1px solid var(--line);background:#170f09}
+.gutter div{padding:0 12px 0 16px}
+pre.code{flex:1;padding:14px 18px;font-family:var(--mono);font-size:12.3px;line-height:1.7;color:#d8c9ab;white-space:pre;overflow:visible;min-width:0}
+textarea.codeedit{flex:1;width:100%;background:#140d07;border:none;color:#e8dcc2;font-family:var(--mono);font-size:12.3px;line-height:1.7;padding:14px 18px;resize:none;min-height:420px}
+textarea.codeedit:focus{outline:none}
+.tok-k{color:#ff8b45}.tok-b{color:#5aa7ff}.tok-s{color:#8fe6b8}.tok-c{color:#6f5f49;font-style:italic}.tok-n{color:#e6c15a}.tok-t{color:#b07aff}.tok-f{color:#ffb347}
+.vw-foot{padding:9px 14px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--dim);background:#1b130c;display:flex;gap:16px;flex-wrap:wrap}
+.binview{padding:26px;display:flex;flex-direction:column;gap:18px}
+.binview .bininfo{font-family:var(--mono);font-size:12.5px;color:var(--mut)}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:14px}
+.swatch{background:var(--surface);border:1px solid var(--line2);border-radius:9px;padding:9px;text-align:center}
+.swatch canvas{width:100%;image-rendering:pixelated;border-radius:5px;display:block}
+.swatch span{display:block;margin-top:7px;font-family:var(--mono);font-size:11px;color:var(--ember)}
+.imgview{padding:26px;display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
+.imgview canvas{width:220px;height:220px;image-rendering:pixelated;border-radius:10px;border:1px solid var(--line2)}
+/* ---------- TUNING ---------- */
+.tune-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:26px;align-items:start}
+.controls{background:var(--overlay);border:1px solid var(--line2);border-radius:14px;padding:22px}
+.ctl-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 22px}
+.ctl{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 15px}
+.ctl-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px;gap:8px}
+.ctl label{font-family:var(--disp);font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--mut)}
+.ctl output{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--acid);background:#13211a;border:1px solid #1f4a38;padding:1px 9px;border-radius:5px;min-width:44px;text-align:center}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;background:linear-gradient(90deg,var(--lava) var(--fill,50%),#3a2817 var(--fill,50%));cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--ember);border:3px solid #241304;box-shadow:0 0 10px rgba(255,179,71,.6);transition:transform .12s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--ember);border:3px solid #241304}
+.ctl.toggle{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.switch{position:relative;width:46px;height:25px;flex:none}
+.switch input{opacity:0;width:100%;height:100%;position:absolute;cursor:pointer;z-index:2;margin:0}
+.switch .tr{position:absolute;inset:0;background:#3a2817;border-radius:20px;transition:.2s;border:1px solid var(--line2)}
+.switch .tr::after{content:"";position:absolute;left:3px;top:3px;width:17px;height:17px;border-radius:50%;background:var(--dim);transition:.2s}
+.switch input:checked+.tr{background:#123526;border-color:#1f6b4e}
+.switch input:checked+.tr::after{left:24px;background:var(--acid);box-shadow:0 0 9px var(--acid)}
+.tune-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.tune-note{margin-top:14px;font-size:12.8px;color:var(--dim)}
+.tune-preview{position:sticky;top:calc(var(--nav) + 16px);background:var(--overlay);border:1px solid var(--line2);border-radius:14px;overflow:hidden}
+.tp-head{display:flex;align-items:center;gap:10px;padding:11px 15px;background:var(--surface);border-bottom:1px solid var(--line)}
+.tp-head b{font-family:var(--mono);font-size:12.5px;color:var(--acid)}
+.tp-head .vbtn{margin-left:auto}
+.tune-preview pre{padding:15px 17px;font-family:var(--mono);font-size:11.8px;line-height:1.7;color:#d8c9ab;overflow:auto;max-height:520px;white-space:pre}
+/* ---------- SETUP ---------- */
+.tabs{display:inline-flex;background:var(--surface);border:1px solid var(--line2);border-radius:9px;padding:4px;gap:4px;margin-bottom:24px}
+.tab{background:none;border:none;color:var(--mut);font-family:var(--disp);font-weight:600;font-size:13px;letter-spacing:.08em;padding:9px 22px;border-radius:6px;text-transform:uppercase}
+.tab.active{background:linear-gradient(120deg,rgba(90,167,255,.2),rgba(176,122,255,.16));color:var(--steel);box-shadow:inset 0 0 0 1px #2c4a73}
+.steps{display:flex;flex-direction:column;gap:14px;max-width:860px}
+.step{display:grid;grid-template-columns:52px 1fr;gap:16px;background:var(--overlay);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.stepnum{font-family:var(--disp);font-weight:700;font-size:26px;color:transparent;-webkit-text-stroke:1.3px var(--steel);line-height:1.1}
+.step h3{font-family:var(--disp);font-size:15.5px;font-weight:600;letter-spacing:.03em;margin-bottom:5px}
+.step p{color:var(--mut);font-size:14px}
+.cmd{display:flex;align-items:center;gap:10px;background:#130c07;border:1px solid var(--line2);border-radius:8px;padding:9px 13px;margin-top:10px;font-family:var(--mono);font-size:12.5px;color:var(--acid);overflow-x:auto}
+.cmd code{white-space:pre;flex:1}
+.cmd .vbtn{flex:none}
+.links{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.chip{font-family:var(--disp);font-size:11.5px;font-weight:600;letter-spacing:.05em;color:var(--steel);border:1px solid #2c4a73;background:rgba(90,167,255,.07);padding:5px 11px;border-radius:20px}
+.chip:hover{background:rgba(90,167,255,.16);text-decoration:none}
+/* ---------- PROMPTS ---------- */
+.prompt-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.pcard{background:var(--overlay);border:1px solid var(--line2);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .2s,box-shadow .2s}
+.pcard:hover{border-color:#6b4a8f;box-shadow:0 12px 40px rgba(176,122,255,.1)}
+.pc-head{padding:16px 18px 12px;border-bottom:1px solid var(--line)}
+.pc-tag{font-family:var(--disp);font-size:10px;font-weight:700;letter-spacing:.18em;color:var(--rune);text-transform:uppercase}
+.pc-head h3{font-family:var(--disp);font-size:16.5px;font-weight:600;margin-top:4px}
+.pc-head p{font-size:13px;color:var(--mut);margin-top:4px}
+.pc-body{padding:14px 18px;flex:1;display:flex;flex-direction:column;gap:12px}
+.pcard pre{background:#130c07;border:1px solid var(--line);border-radius:8px;padding:13px 15px;font-family:var(--mono);font-size:11.4px;line-height:1.65;color:#c4b598;max-height:250px;overflow:auto;white-space:pre-wrap;flex:1}
+.pc-fill{display:flex;gap:8px}
+.pc-fill input{flex:1;background:#130c07;border:1px solid var(--line2);color:var(--ink);font-family:var(--mono);font-size:12px;padding:8px 12px;border-radius:7px}
+.pc-fill input::placeholder{color:var(--dim)}
+.pc-foot{display:flex;align-items:center;gap:10px;padding:0 18px 16px}
+.pc-foot .chars{font-family:var(--mono);font-size:11px;color:var(--dim);margin-left:auto}
+/* ---------- FOOTER ---------- */
+footer{border-top:1px solid var(--line);background:#150e08;padding:48px 0 34px;position:relative;z-index:3}
+.fgrid{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:36px}
+footer h4{font-family:var(--disp);font-size:12.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ember);margin-bottom:12px}
+footer p,footer li{font-size:13.2px;color:var(--mut)}
+footer ul{list-style:none}
+footer li{padding:4px 0;display:flex;gap:8px}
+footer li b{color:var(--ink);font-weight:600;min-width:110px}
+.fine{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--dim);display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+/* ---------- TOASTS ---------- */
+#toasts{position:fixed;bottom:22px;right:22px;z-index:90;display:flex;flex-direction:column;gap:10px;max-width:min(380px,90vw)}
+.toast{display:flex;align-items:center;gap:12px;background:#241811;border:1px solid var(--line2);border-left:3px solid var(--acid);border-radius:10px;padding:12px 16px;font-size:13.5px;color:var(--ink);box-shadow:0 14px 40px rgba(0,0,0,.55);animation:tin .3s ease}
+.toast.warn{border-left-color:var(--ember)}
+.toast .undo{background:none;border:1px solid var(--line2);color:var(--ember);font-family:var(--disp);font-size:11px;font-weight:700;letter-spacing:.08em;padding:5px 11px;border-radius:6px;flex:none}
+.toast .undo:hover{border-color:var(--ember)}
+@keyframes tin{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+.toast.out{opacity:0;transform:translateX(30px);transition:.3s}
+@media (max-width:1020px){
+  .herogrid{grid-template-columns:1fr}.hero-ring{display:none}
+  .tune-grid{grid-template-columns:1fr}.tune-preview{position:static}
+  .prompt-grid{grid-template-columns:1fr}
+  .fgrid{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+  .navlinks{display:none}
+  .wb-body{grid-template-columns:1fr}
+  .tree{max-height:210px;border-right:none;border-bottom:1px solid var(--line)}
+  .ctl-grid{grid-template-columns:1fr}
+  .step{grid-template-columns:36px 1fr;padding:15px}
+  .wrap{padding:0 16px}
+  .sndbtn span{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important;transition-duration:.001s!important}
+  html{scroll-behavior:auto}
+  .rv{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<canvas id="embers" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<nav>
+  <a class="brand" href="#top" aria-label="Slipgate Kit home">
+    <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 1 L24 7.5 V18.5 L13 25 L2 18.5 V7.5 Z" fill="none" stroke="#ff6b1a" stroke-width="2"/><path d="M14.5 5 L8 14 H12.5 L11 21 L18 11.5 H13.5 Z" fill="#ffb347"/></svg>
+    SLIPGATE<em>//</em>KIT
+  </a>
+  <div class="navlinks">
+    <a href="#workbench" data-spy="workbench">Workbench</a>
+    <a href="#tuning" data-spy="tuning">Tuning</a>
+    <a href="#setup" data-spy="setup">Setup</a>
+    <a href="#prompts" data-spy="prompts">LLM Prompts</a>
+  </div>
+  <div class="navright">
+    <button class="sndbtn" id="sndToggle" aria-pressed="true"><i class="dot"></i><span>SOUND ON</span></button>
+    <button class="btn btn-primary btn-sm" id="dlTop">⭳ DOWNLOAD KIT .ZIP</button>
+  </div>
+</nav>
+
+<header id="top">
+  <svg class="hero-ring" viewBox="0 0 200 200" aria-hidden="true">
+    <circle cx="100" cy="100" r="92" fill="none" stroke="#ff6b1a" stroke-width="1.4" stroke-dasharray="4 7"/>
+    <circle cx="100" cy="100" r="72" fill="none" stroke="#b07aff" stroke-width="1"/>
+    <path d="M100 14 L176 57 V143 L100 186 L24 143 V57 Z" fill="none" stroke="#ffb347" stroke-width="1.6"/>
+    <path d="M108 40 L74 108 H98 L90 160 L130 92 H104 Z" fill="#ff6b1a"/>
+  </svg>
+  <div class="wrap herogrid">
+    <div>
+      <div class="eyebrow">vkQuake · id Tech 2 · vanilla QuakeC · Win + Linux</div>
+      <h1>Ship your first<br><span class="grad">Quake.</span></h1>
+      <p class="lede">A complete, compile-ready mod skeleton for your zero-code, LLM-assisted workflow: <b>14 QuakeC source files</b>, a playable graybox arena with a working door, two enemies and an exit loop, <b>build scripts for both platforms</b>, generated textures, and <b>four field-tested LLM prompts</b>. Tune the gameplay below, download the ZIP, drop it next to <b>id1</b>, run build.</p>
+      <div class="ctas">
+        <button class="btn btn-primary" id="dlHero">⭳ DOWNLOAD THE KIT</button>
+        <a class="btn btn-ghost" href="#workbench">BROWSE THE FILES →</a>
+      </div>
+      <div class="stats">
+        <div class="stat"><b id="stFiles">–</b><span>files</span></div>
+        <div class="stat"><b id="stLines">–</b><span>lines of QuakeC</span></div>
+        <div class="stat"><b id="stBrush">–</b><span>map brushes</span></div>
+        <div class="stat"><b>4</b><span>LLM prompts</span></div>
+      </div>
+    </div>
+    <div class="term rv">
+      <div class="term-bar"><i></i><i></i><i></i><span>slipgate — build log</span></div>
+      <div class="term-body" id="bootlog"></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section id="workbench">
+  <div class="sec-head rv">
+    <div class="eyebrow">01 · The kit</div>
+    <h2>Workbench</h2>
+    <p>Every file that ships in the ZIP. Read it, search it, edit it right here — your edits are kept in this page and included in the download. The <b style="color:var(--acid)">tuning.qc</b> file is wired live to the Tuning panel below.</p>
+  </div>
+  <div class="wb rv" style="--d:.1s">
+    <div class="wb-top">
+      <span class="wb-title">SLIPGATE://WORKBENCH</span>
+      <div class="wb-search">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#efe4cf" stroke-width="1.6"/><path d="M11 11 L15 15" stroke="#efe4cf" stroke-width="1.6"/></svg>
+        <input type="text" id="fileSearch" placeholder="filter files… (e.g. weapons, .bat)" aria-label="Filter files">
+      </div>
+      <span class="wb-count" id="fileCount"></span>
+    </div>
+    <div class="wb-body">
+      <div class="tree" id="tree" role="navigation" aria-label="Kit files"></div>
+      <div class="viewer">
+        <div class="vw-head">
+          <span class="vw-path" id="vwPath">qc/tuning.qc</span>
+          <span class="badge lang" id="vwLang">QuakeC</span>
+          <span class="badge" id="vwLines"></span>
+          <span class="badge edited" id="vwEdited" hidden>modified</span>
+          <div class="vw-actions">
+            <button class="vbtn" id="vwCopy">COPY</button>
+            <button class="vbtn" id="vwEdit">EDIT</button>
+            <button class="vbtn" id="vwReset" hidden>RESET</button>
+            <button class="vbtn hot" id="vwDl">⭳ FILE</button>
+          </div>
+        </div>
+        <div class="code-wrap" id="codeWrap"></div>
+        <div class="vw-foot"><span id="vwFoot"></span><span>Edits persist in this page · included in ZIP</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tuning">
+  <div class="sec-head rv">
+    <div class="eyebrow">02 · Game feel</div>
+    <h2>Tuning panel</h2>
+    <p>These controls rewrite <b style="color:var(--acid)">qc/tuning.qc</b> live — no code editing needed. Move a slider, watch the source update, then download. This is the exact file your LLM should never hardcode values into.</p>
+  </div>
+  <div class="tune-grid">
+    <div class="controls rv">
+      <div class="ctl-grid" id="ctlGrid"></div>
+      <div class="tune-actions">
+        <button class="btn btn-ghost btn-sm" id="tuneReset">↺ RESET DEFAULTS</button>
+        <button class="btn btn-ghost btn-sm" id="tuneRandom">⚄ RANDOMIZE</button>
+        <button class="btn btn-primary btn-sm" id="tuneDl">⭳ tuning.qc</button>
+      </div>
+      <p class="tune-note">Balanced defaults match classic Quake feel (270 jump velocity, 6×6 shotgun). Randomize stays inside sane ranges. “Monsters off” also skips precaching the monster model — useful while your asset folder is incomplete.</p>
+    </div>
+    <div class="tune-preview rv" style="--d:.12s">
+      <div class="tp-head"><b>qc/tuning.qc</b><span class="badge edited">live</span><button class="vbtn" id="tuneCopy">COPY</button></div>
+      <pre id="tunePreview"></pre>
+    </div>
+  </div>
+</section>
+
+<section id="setup">
+  <div class="sec-head rv">
+    <div class="eyebrow">03 · Zero to playable</div>
+    <h2>Setup guide</h2>
+    <p>Follow top to bottom. Everything is free. The only paid thing you will ever need is your own time — and the LLM is carrying the code.</p>
+  </div>
+  <div class="tabs rv" role="tablist">
+    <button class="tab active" id="tabWin" role="tab" aria-selected="true"> Windows</button>
+    <button class="tab" id="tabLinux" role="tab" aria-selected="false">🐧 Linux</button>
+  </div>
+  <div class="steps rv" id="stepsWin" style="--d:.08s"></div>
+  <div class="steps" id="stepsLinux" hidden></div>
+</section>
+
+<section id="prompts">
+  <div class="sec-head rv">
+    <div class="eyebrow">04 · Your coding partner</div>
+    <h2>LLM prompt pack</h2>
+    <p>Paste the <b style="color:var(--rune)">System prompt</b> into your LLM’s project instructions once. Then use the task, debug and asset prompts as templates. They encode every constraint of this kit so the model writes code that actually compiles.</p>
+  </div>
+  <div class="prompt-grid rv" id="promptGrid" style="--d:.08s"></div>
+</section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="fgrid">
+      <div>
+        <h4>Slipgate//Kit</h4>
+        <p>A starter mod for vkQuake (id Tech 2). Original kit code is MIT-licensed — do anything with it. The engine, base content and your itch.io packs keep their own licenses; the kit ships the notices for you in <span style="font-family:var(--mono);color:var(--ember)">CREDITS.md</span>.</p>
+      </div>
+      <div>
+        <h4>License matrix</h4>
+        <ul>
+          <li><b>Kit code</b> MIT — yours to keep</li>
+          <li><b>vkQuake</b> GPL-2.0+ — ship license + source link</li>
+          <li><b>LibreQuake</b> BSD-3-Clause — keep attribution</li>
+          <li><b>itch.io packs</b> per-pack — log every download</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Community</h4>
+        <ul>
+          <li><a href="https://www.slipseer.com/" target="_blank" rel="noopener">Slipseer — tutorials &amp; tools</a></li>
+          <li><a href="https://github.com/Novum/vkQuake" target="_blank" rel="noopener">vkQuake on GitHub</a></li>
+          <li><a href="https://github.com/lavenderdotpet/LibreQuake" target="_blank" rel="noopener">LibreQuake base content</a></li>
+          <li><a href="https://www.fteqcc.org/" target="_blank" rel="noopener">FTEQCC compiler</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="fine">
+      <span>Not affiliated with id Software. Quake is a trademark of id Software. Never ship id’s commercial .pak files.</span>
+      <span>SLIPGATE//KIT · built for first-time modders</span>
+    </div>
+  </div>
+</footer>
+
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ================================================================
+   SLIPGATE//KIT — single-file starter-kit workbench
+   ================================================================ */
+
+/* ---------------- QuakeC source files ---------------- */
+const QC = {};
+
+QC["qc/progs.src"] = `progs.dat
+defs.qc
+frames.qc
+tuning.qc
+subs.qc
+combat.qc
+items.qc
+weapons.qc
+player.qc
+monsters.qc
+doors.qc
+triggers.qc
+world.qc
+client.qc
+`;
+
+QC["qc/defs.qc"] = `// ============================================================
+// defs.qc — engine interface: globals, entity fields, builtins.
+// Names here must match what the engine expects. Do not rename.
+// ============================================================
+
+// ---- globals the engine writes ----
+entity self, other, world;
+float  time, frametime, force_retouch;
+string mapname, startspot;
+float  deathmatch, coop, teamplay, serverflags;
+float  total_secrets, total_monsters, found_secrets, killed_monsters;
+float  parm1, parm2, parm3, parm4, parm5, parm6, parm7, parm8;
+float  parm9, parm10, parm11, parm12, parm13, parm14, parm15, parm16;
+vector v_forward, v_up, v_right;
+float  trace_allsolid, trace_startsolid, trace_fraction, trace_inopen, trace_inwater;
+entity trace_ent;
+vector trace_endpos, trace_plane_normal;
+float  trace_plane_dist;
+entity msg_entity;
+float  skill;
+
+// ---- kit globals ----
+entity activator;
+float  intermission_running, intermission_end;
+string nextmap;
+
+// ---- entity fields the engine reads/writes ----
+.float modelindex;
+.vector absmin, absmax;
+.float ltime;
+.float movetype, solid;
+.vector origin, oldorigin, velocity, angles, avelocity, punchangle;
+.string classname, model;
+.float frame, skin, effects;
+.vector mins, maxs, size;
+.void() touch, use, think;
+.float nextthink;
+.entity groundentity;
+.float health, frags, weapon;
+.string weaponmodel;
+.float weaponframe, currentammo;
+.float ammo_shells, ammo_nails, ammo_rockets, ammo_cells;
+.float items;
+.float takedamage;
+.entity chain;
+.float deadflag;
+.vector view_ofs;
+.float button0, button1, button2, impulse;
+.float fixangle;
+.vector v_angle;
+.float idealpitch, flags, colormap, team, max_health, teleport_time;
+.float armortype, armorvalue, waterlevel, watertype, ideal_yaw, yaw_speed;
+.entity goalentity, enemy, owner, dmg_inflictor, aiment;
+.float spawnflags;
+.string target, targetname, netname;
+.vector movedir;
+.string message, noise, noise1, noise2, noise3;
+.float dmg_take, dmg_save;
+
+// ---- map keys + kit fields ----
+.float cnt, wait, delay, speed, lip, angle, light, sounds, style, dmg;
+.string wad, killtarget, map, mdl;
+.float state, attack_finished, pain_finished, respawn_at;
+.float weaponanim_next, anim_next, anim_frame, air_finished;
+.vector pos1, pos2, finaldest;
+.void() think1, th_stand, th_walk, th_melee, th_die;
+.void(entity, float) th_pain;
+
+// ---- constants ----
+float TRUE = 1, FALSE = 0;
+float MOVETYPE_NONE = 0, MOVETYPE_WALK = 3, MOVETYPE_FLY = 4;
+float MOVETYPE_TOSS = 5, MOVETYPE_STEP = 6, MOVETYPE_PUSH = 7, MOVETYPE_NOCLIP = 8;
+float SOLID_NOT = 0, SOLID_TRIGGER = 1, SOLID_BBOX = 2, SOLID_SLIDEBOX = 3, SOLID_BSP = 4;
+float FL_CLIENT = 8, FL_MONSTER = 32, FL_ITEM = 256, FL_ONGROUND = 512;
+float FL_GODMODE = 64, FL_NOTARGET = 128;
+float DEAD_NO = 0, DEAD_DYING = 1, DEAD_DEAD = 2;
+float DAMAGE_NO = 0, DAMAGE_YES = 1, DAMAGE_AIM = 2;
+float CHAN_AUTO = 0, CHAN_WEAPON = 1, CHAN_VOICE = 2, CHAN_ITEM = 3, CHAN_BODY = 4;
+float ATTN_NONE = 0, ATTN_NORM = 1, ATTN_IDLE = 2, ATTN_STATIC = 3;
+float CONTENT_EMPTY = -1, CONTENT_SOLID = -2, CONTENT_WATER = -3;
+float CONTENT_SLIME = -4, CONTENT_LAVA = -5, CONTENT_SKY = -6;
+float PRINT_LOW = 0, PRINT_MEDIUM = 1, PRINT_HIGH = 2;
+float IT_SHOTGUN = 1, IT_SHELLS = 256, IT_AXE = 4096;
+
+// ---- builtins (vanilla Quake / vkQuake safe) ----
+void(vector ang) makevectors = #1;
+void(entity e, vector o) setorigin = #2;
+void(entity e, string m) setmodel = #3;
+void(entity e, vector min, vector max) setsize = #4;
+float() random = #7;
+void(entity e, float chan, string samp, float vol, float atten) sound = #8;
+vector(vector v) normalize = #9;
+void(string e) objerror = #11;
+float(vector v) vlen = #12;
+float(vector v) vectoyaw = #13;
+void(entity e) remove = #15;
+void(vector v1, vector v2, float nomonsters, entity forent) traceline = #16;
+entity() checkclient = #17;
+entity(entity start, .string fld, string match) find = #18;
+string(string s) precache_sound = #19;
+string(string s) precache_model = #20;
+void(string s, ...) bprint = #23;
+void(entity client, float level, string s, ...) sprint = #24;
+void(string s, ...) dprint = #25;
+string(float f) ftos = #26;
+string(vector v) vtos = #27;
+float(float yaw, float dist) walkmove = #32;
+float() droptofloor = #34;
+float(float v) floor = #37;
+float(float v) fabs = #42;
+float(string s) cvar = #45;
+void(vector o, vector d, float color, float count) particle = #48;
+void() ChangeYaw = #49;
+void(string s) changelevel = #70;
+void(string s, ...) centerprint = #73;
+`;
+
+QC["qc/frames.qc"] = `// ============================================================
+// frames.qc — numeric animation frames.
+// We use plain numbers (NOT $frame macros) so FTEQCC never needs
+// the .mdl files at compile time. Values target the stock /
+// LibreQuake models. Swap in custom models? Update these numbers
+// to match the new model's frame order (ask your LLM, prompt #4).
+// All indices are kept low so they are valid on any stock model.
+// ============================================================
+
+// player.mdl — first run cycle
+float PF_RUN1 = 0;      // cycle PF_RUN1 .. PF_RUN1+5
+float PF_RUN_COUNT = 6;
+
+// v_shot.mdl — view-model fire animation
+float VF_FIRE1 = 1;     // cycle VF_FIRE1 .. VF_FIRE1+4
+float VF_FIRE_COUNT = 5;
+
+// soldier.mdl — the stalker
+float MS_STAND  = 0;
+float MS_WALK1  = 1;    // cycle MS_WALK1 .. MS_WALK1+5
+float MS_WALK_COUNT = 6;
+float MS_ATTACK = 7;
+`;
+
+QC["qc/subs.qc"] = `// ============================================================
+// subs.qc — small shared helpers.
+// ============================================================
+
+void() SUB_Null = {};
+void() SUB_Remove = { remove(self); };
+
+float() crandom = { return 2 * (random() - 0.5); };
+
+// Fire the "use" function of every entity whose targetname
+// matches self.target. Classic trigger -> target wiring.
+void() SUB_UseTargets = {
+	local entity t, st;
+	if (!self.target) return;
+	st = self;
+	t = world;
+	while ( (t = find(t, targetname, self.target)) ) {
+		if (t.use) {
+			self = t;
+			self.use();
+			self = st;
+		}
+	}
+};
+
+// ---- linear movement for MOVETYPE_PUSH (doors) ----
+void() SUB_CalcMoveDone = {
+	setorigin(self, self.finaldest);
+	self.velocity = '0 0 0';
+	self.nextthink = -1;
+	if (self.think1) self.think1();
+};
+
+void(vector tdest, float tspeed, void() func) SUB_CalcMove = {
+	local vector vdestdelta;
+	local float len, traveltime;
+	if (!tspeed) objerror("SUB_CalcMove: no speed defined");
+	self.think1 = func;
+	self.finaldest = tdest;
+	self.think = SUB_CalcMoveDone;
+	vdestdelta = tdest - self.origin;
+	len = vlen(vdestdelta);
+	traveltime = len / tspeed;
+	if (traveltime <= 0) {
+		self.velocity = '0 0 0';
+		self.nextthink = self.ltime + 0.1;
+		return;
+	}
+	self.nextthink = self.ltime + traveltime;
+	self.velocity = vdestdelta * (1 / traveltime);
+};
+
+// items hide on pickup, then come back
+void() SUB_regen = {
+	self.model = self.mdl;
+	setmodel(self, self.model);
+	self.solid = SOLID_TRIGGER;
+};
+`;
+
+QC["qc/combat.qc"] = `// ============================================================
+// combat.qc — damage, bullets, visibility.
+// ============================================================
+
+// One clean damage path for everything. Armor saves a third.
+void(entity targ, entity attacker, float damage) T_Damage = {
+	local entity st;
+	local float save;
+	if (!targ.takedamage) return;
+	if (targ.health <= 0) return;
+
+	if (targ.classname == "player") {
+		if (targ.armortype > 0 && targ.armorvalue > 0) {
+			save = damage * 0.3;
+			if (save > targ.armorvalue) save = targ.armorvalue;
+			targ.armorvalue = targ.armorvalue - save;
+			damage = damage - save;
+		}
+		targ.punchangle_x = -1;
+	}
+
+	targ.health = targ.health - damage;
+
+	if (targ.health <= 0) {
+		if (targ.classname == "monster_stalker")
+			killed_monsters = killed_monsters + 1;
+		if (targ.th_die) {
+			st = self; self = targ;
+			targ.th_die();
+			self = st;
+		}
+		return;
+	}
+	if (targ.th_pain) {
+		st = self; self = targ;
+		targ.th_pain(attacker, damage);
+		self = st;
+	}
+};
+
+// Hitscan spread. self = shooter.
+void(float count, vector spread, float damage) FireBullets = {
+	local vector src, dir;
+	src = self.origin + self.view_ofs;
+	makevectors(self.v_angle);
+	while (count > 0) {
+		count = count - 1;
+		dir = normalize(v_forward
+			+ v_right * crandom() * spread_x
+			+ v_up    * crandom() * spread_y);
+		traceline(src, src + dir * 2048, FALSE, self);
+		if (trace_fraction == 1) continue;
+		if (trace_ent.takedamage) {
+			particle(trace_endpos, '0 0 0', 73, 6);
+			T_Damage(trace_ent, self, damage);
+		} else {
+			particle(trace_endpos, trace_plane_normal * 12, 15, 3);
+		}
+	}
+};
+
+float(entity targ) visible = {
+	traceline(self.origin + self.view_ofs, targ.origin, TRUE, self);
+	return trace_fraction == 1;
+};
+`;
+
+QC["qc/items.qc"] = `// ============================================================
+// items.qc — health, shells, shotgun pickup. All respawn.
+// Models use id-standard names so LibreQuake works out of the box.
+// ============================================================
+
+void() health_touch = {
+	if (other.classname != "player") return;
+	if (other.health >= TUNE_MAX_HEALTH) return;
+	other.health = other.health + TUNE_HEALTH_AMT;
+	if (other.health > TUNE_MAX_HEALTH) other.health = TUNE_MAX_HEALTH;
+	sprint(other, PRINT_LOW, "Picked up health\\n");
+	sound(other, CHAN_ITEM, "items/health1.wav", 1, ATTN_NORM);
+	self.solid = SOLID_NOT;
+	self.model = "";
+	setmodel(self, self.model);
+	self.think = SUB_regen;
+	self.nextthink = time + 15;
+};
+
+void() ammo_touch = {
+	if (other.classname != "player") return;
+	if (other.ammo_shells >= 200) return;
+	other.ammo_shells = other.ammo_shells + 10;
+	sprint(other, PRINT_LOW, "Picked up 10 shells\\n");
+	sound(other, CHAN_ITEM, "weapons/pkup.wav", 1, ATTN_NORM);
+	self.solid = SOLID_NOT;
+	self.model = "";
+	setmodel(self, self.model);
+	self.think = SUB_regen;
+	self.nextthink = time + 20;
+};
+
+void() weapon_touch = {
+	if (other.classname != "player") return;
+	other.items = other.items | IT_SHOTGUN;
+	other.ammo_shells = other.ammo_shells + 10;
+	sprint(other, PRINT_LOW, "Shells +10\\n");
+	sound(other, CHAN_ITEM, "weapons/pkup.wav", 1, ATTN_NORM);
+	self.solid = SOLID_NOT;
+	self.model = "";
+	setmodel(self, self.model);
+	self.think = SUB_regen;
+	self.nextthink = time + 25;
+};
+
+void(string mdl) PlaceItem = {
+	self.mdl = mdl;
+	setmodel(self, mdl);
+	setsize(self, '-16 -16 0', '16 16 56');
+	self.solid = SOLID_TRIGGER;
+	self.movetype = MOVETYPE_NONE;
+	droptofloor();
+};
+
+void() item_health1  = { PlaceItem("maps/b_bh25.bsp"); self.touch = health_touch; };
+void() item_shells   = { PlaceItem("maps/b_shell0.bsp"); self.touch = ammo_touch; };
+void() weapon_shotgun = { PlaceItem("progs/g_shot.mdl"); self.touch = weapon_touch; };
+`;
+
+QC["qc/weapons.qc"] = `// ============================================================
+// weapons.qc — one weapon done well: the shotgun.
+// All feel-values come from tuning.qc. Add weapon #2 by copying
+// this file's pattern (ask your LLM, task prompt).
+// ============================================================
+
+void() W_FireShotgun = {
+	sound(self, CHAN_WEAPON, "weapons/shotgn2.wav", 1, ATTN_NORM);
+	self.punchangle_x = -2;
+	FireBullets(TUNE_PELLETS, '0.05 0.05 0', TUNE_PELLET_DMG);
+};
+
+void() W_Attack = {
+	if (self.attack_finished > time) return;
+	if (self.ammo_shells <= 0 && !TUNE_DEV_INFINITE_AMMO) {
+		self.attack_finished = time + 0.3;
+		sound(self, CHAN_WEAPON, "weapons/dryfire.wav", 1, ATTN_NORM);
+		return;
+	}
+	if (!TUNE_DEV_INFINITE_AMMO)
+		self.ammo_shells = self.ammo_shells - 1;
+	self.attack_finished = time + TUNE_FIRE_DELAY;
+	self.weaponframe = VF_FIRE1;
+	self.weaponanim_next = time + 0.07;
+	W_FireShotgun();
+};
+
+// called every frame from PlayerPostThink
+void() W_WeaponFrame = {
+	if (self.weaponframe > 0 && time >= self.weaponanim_next) {
+		self.weaponanim_next = time + 0.07;
+		self.weaponframe = self.weaponframe + 1;
+		if (self.weaponframe >= VF_FIRE1 + VF_FIRE_COUNT)
+			self.weaponframe = 0;
+	}
+};
+`;
+
+QC["qc/player.qc"] = `// ============================================================
+// player.qc — jump, pain, death, respawn, water, run animation.
+// ============================================================
+
+void() PlayerJump = {
+	if (self.waterlevel > 2) return;
+	if (!(self.flags & FL_ONGROUND)) return;
+	self.velocity_z = TUNE_JUMP_SPEED;
+	sound(self, CHAN_BODY, "player/plyrjmp8.wav", 1, ATTN_NORM);
+};
+
+void() player_run = {
+	if (self.deadflag) return;
+	if (self.velocity_x * self.velocity_x + self.velocity_y * self.velocity_y < 100) {
+		self.frame = PF_RUN1;
+		return;
+	}
+	if (!(self.flags & FL_ONGROUND)) return;
+	if (time < self.anim_next) return;
+	self.anim_next = time + 0.1;
+	self.anim_frame = self.anim_frame + 1;
+	if (self.anim_frame >= PF_RUN_COUNT) self.anim_frame = 0;
+	self.frame = PF_RUN1 + self.anim_frame;
+};
+
+void() player_die = {
+	self.deadflag = DEAD_DEAD;
+	self.solid = SOLID_NOT;
+	self.movetype = MOVETYPE_NONE;
+	self.velocity = '0 0 0';
+	self.view_ofs = '0 0 -8';
+	self.weaponmodel = "";
+	self.weaponframe = 0;
+	self.respawn_at = time + TUNE_RESPAWN_TIME;
+	sound(self, CHAN_VOICE, "player/death1.wav", 1, ATTN_NORM);
+	particle(self.origin + '0 0 24', '0 0 40', 73, 20);
+	sprint(self, PRINT_HIGH, "You died. Respawning in ", ftos(TUNE_RESPAWN_TIME), " seconds...\\n");
+};
+
+void(entity attacker, float damage) player_pain = {
+	if (time < self.pain_finished) return;
+	self.pain_finished = time + 0.5;
+	sound(self, CHAN_VOICE, "player/pain1.wav", 1, ATTN_NORM);
+};
+
+// lava/slime burn, deep water drowns. Map has none yet — ready for later.
+void() WaterMove = {
+	if (self.waterlevel == 0) { self.air_finished = time + 12; return; }
+	if (self.watertype == CONTENT_LAVA || self.watertype == CONTENT_SLIME) {
+		if (time > self.pain_finished) {
+			self.pain_finished = time + 1;
+			T_Damage(self, world, 10);
+		}
+	}
+	if (self.waterlevel == 3) {
+		if (time > self.air_finished) {
+			self.air_finished = time + 1;
+			T_Damage(self, world, 4);
+		}
+	} else {
+		self.air_finished = time + 12;
+	}
+};
+`;
+
+QC["qc/monsters.qc"] = `// ============================================================
+// monsters.qc — the Stalker: a melee chaser built on soldier.mdl.
+// Simple, readable state machine: stand -> walk -> melee -> die.
+// Precaches happen HERE (a spawn function), so with monsters
+// disabled — or none placed in a map — missing monster assets
+// can never crash the game.
+// ============================================================
+
+void() stalker_walk;   // forward declaration
+
+void() stalker_melee_hit = {
+	self.think = stalker_walk;
+	self.nextthink = time + 0.6;
+	if (!self.enemy || self.enemy.health <= 0) return;
+	if (vlen(self.enemy.origin - self.origin) > 80) return;
+	T_Damage(self.enemy, self, TUNE_MON_DAMAGE);
+};
+
+void() stalker_melee = {
+	self.think = stalker_melee_hit;
+	self.nextthink = time + 0.4;
+	self.frame = MS_ATTACK;
+	sound(self, CHAN_WEAPON, "soldier/sattck1.wav", 1, ATTN_NORM);
+};
+
+void() stalker_walk = {
+	local float d;
+	if (!self.enemy || self.enemy.health <= 0) {
+		self.enemy = world;
+		self.think = stalker_stand;
+		self.nextthink = time + 0.2;
+		return;
+	}
+	self.think = stalker_walk;
+	self.nextthink = time + 0.1;
+	self.ideal_yaw = vectoyaw(self.enemy.origin - self.origin);
+	ChangeYaw();
+	d = vlen(self.enemy.origin - self.origin);
+	if (d < 64) { stalker_melee(); return; }
+	if (!walkmove(self.ideal_yaw, TUNE_MON_SPEED * 0.1)) {
+		if (!walkmove(self.ideal_yaw + 60, TUNE_MON_SPEED * 0.1))
+			walkmove(self.ideal_yaw - 60, TUNE_MON_SPEED * 0.1);
+	}
+	self.anim_frame = self.anim_frame + 1;
+	if (self.anim_frame >= MS_WALK_COUNT) self.anim_frame = 0;
+	self.frame = MS_WALK1 + self.anim_frame;
+};
+
+void() stalker_stand = {
+	local entity e;
+	self.think = stalker_stand;
+	self.nextthink = time + 0.2;
+	self.frame = MS_STAND;
+	if (random() < 0.04)
+		sound(self, CHAN_VOICE, "soldier/idle.wav", 1, ATTN_IDLE);
+	e = checkclient();               // engine does the visibility test
+	if (!e) return;
+	if (vlen(e.origin - self.origin) > TUNE_MON_SIGHT) return;
+	self.enemy = e;
+	sound(self, CHAN_VOICE, "soldier/sight1.wav", 1, ATTN_NORM);
+	stalker_walk();
+};
+
+void(entity attacker, float damage) stalker_pain = {
+	if (time < self.pain_finished) return;
+	self.pain_finished = time + 0.4;
+	sound(self, CHAN_VOICE, "soldier/pain1.wav", 1, ATTN_NORM);
+	self.think = stalker_walk;
+	self.nextthink = time + 0.2;     // brief flinch
+};
+
+void() stalker_die = {
+	sound(self, CHAN_VOICE, "soldier/death1.wav", 1, ATTN_NORM);
+	particle(self.origin + '0 0 24', '0 0 30', 73, 24);
+	self.solid = SOLID_NOT;
+	self.frame = MS_STAND;
+	self.think = SUB_Remove;         // placeholder death: burst + remove
+	self.nextthink = time + 0.6;
+};
+
+void() monster_stalker = {
+	if (!TUNE_MONSTERS_ON) { remove(self); return; }
+	precache_model("progs/soldier.mdl");
+	precache_sound("soldier/idle.wav");
+	precache_sound("soldier/sight1.wav");
+	precache_sound("soldier/sattck1.wav");
+	precache_sound("soldier/pain1.wav");
+	precache_sound("soldier/death1.wav");
+	setmodel(self, "progs/soldier.mdl");
+	setsize(self, '-16 -16 -24', '16 16 24');
+	self.solid = SOLID_SLIDEBOX;
+	self.movetype = MOVETYPE_STEP;
+	self.flags = self.flags | FL_MONSTER;
+	self.health = TUNE_MON_HEALTH;
+	self.takedamage = DAMAGE_AIM;
+	self.view_ofs = '0 0 24';
+	self.yaw_speed = 40;
+	self.th_die = stalker_die;
+	self.th_pain = stalker_pain;
+	droptofloor();
+	total_monsters = total_monsters + 1;
+	stalker_stand();
+};
+`;
+
+QC["qc/doors.qc"] = `// ============================================================
+// doors.qc — trigger-opened door that closes itself.
+// Wire it: trigger_multiple "target" "exitdoor" -> func_door
+// "targetname" "exitdoor". angle -1 = up, -2 = down.
+// ============================================================
+
+void() door_go_down;   // forward declaration
+
+void() door_wait_return = {
+	self.think = door_go_down;
+	self.nextthink = self.ltime + self.wait;
+};
+
+void() door_go_up = {
+	if (self.state) return;          // already open / opening
+	self.state = 1;
+	sound(self, CHAN_VOICE, "doors/airdoor1.wav", 1, ATTN_NORM);
+	SUB_CalcMove(self.pos2, self.speed, door_wait_return);
+};
+
+void() door_go_down = {
+	self.state = 0;
+	sound(self, CHAN_VOICE, "doors/airdoor2.wav", 1, ATTN_NORM);
+	SUB_CalcMove(self.pos1, self.speed, SUB_Null);
+};
+
+void() door_use = { door_go_up(); };
+
+void() func_door = {
+	local float travel;
+	if (!self.speed) self.speed = 100;
+	if (!self.wait) self.wait = 3;
+	if (!self.lip) self.lip = 8;
+	if (self.angle == -1) self.movedir = '0 0 1';
+	else if (self.angle == -2) self.movedir = '0 0 -1';
+	else {
+		makevectors('0 1 0' * self.angle);
+		self.movedir = v_forward;
+		self.movedir_z = 0;
+	}
+	setmodel(self, self.model);
+	self.solid = SOLID_BSP;
+	self.movetype = MOVETYPE_PUSH;
+	self.pos1 = self.origin;
+	travel = self.movedir_x * self.size_x + self.movedir_y * self.size_y
+		+ self.movedir_z * self.size_z - self.lip;
+	if (travel < 0) travel = 0;
+	self.pos2 = self.pos1 + self.movedir * travel;
+	self.use = door_use;
+};
+`;
+
+QC["qc/triggers.qc"] = `// ============================================================
+// triggers.qc — invisible brush volumes from the map.
+// ============================================================
+
+void() InitTrigger = {
+	if (self.model != "") setmodel(self, self.model);
+	setsize(self, self.mins, self.maxs);
+	self.solid = SOLID_TRIGGER;
+	self.movetype = MOVETYPE_NONE;
+};
+
+void() multi_touch = {
+	if (other.classname != "player") return;
+	if (time < self.attack_finished) return;
+	self.attack_finished = time + self.wait;
+	activator = other;
+	SUB_UseTargets();
+};
+
+void() trigger_multiple = {
+	if (!self.wait) self.wait = 1;
+	InitTrigger();
+	self.touch = multi_touch;
+};
+
+void() once_touch = {
+	if (other.classname != "player") return;
+	activator = other;
+	SUB_UseTargets();
+	self.think = SUB_Remove;
+	self.nextthink = time + 0.2;
+};
+
+void() trigger_once = {
+	InitTrigger();
+	self.touch = once_touch;
+};
+
+void() changelevel_touch = {
+	if (other.classname != "player") return;
+	if (intermission_running) return;
+	intermission_running = 1;
+	intermission_end = time + 5;
+	nextmap = self.map;
+	if (!nextmap) nextmap = mapname;
+	centerprint("SLIPGATE REACHED\\n\\nMonsters: ", ftos(killed_monsters),
+		" / ", ftos(total_monsters), "\\n\\nHold on...");
+	bprint(other.netname, " reached the exit\\n");
+};
+
+void() trigger_changelevel = {
+	InitTrigger();
+	self.touch = changelevel_touch;
+};
+`;
+
+QC["qc/world.qc"] = `// ============================================================
+// world.qc — worldspawn precaches + static map entities.
+// Monster assets are precached by monster_stalker itself.
+// ============================================================
+
+void() worldspawn = {
+	skill = cvar("skill");
+	precache_model("progs/player.mdl");
+	precache_model("progs/v_shot.mdl");
+	precache_model("progs/g_shot.mdl");
+	precache_model("maps/b_bh25.bsp");
+	precache_model("maps/b_shell0.bsp");
+	precache_sound("weapons/shotgn2.wav");
+	precache_sound("weapons/dryfire.wav");
+	precache_sound("weapons/pkup.wav");
+	precache_sound("items/health1.wav");
+	precache_sound("player/plyrjmp8.wav");
+	precache_sound("player/pain1.wav");
+	precache_sound("player/death1.wav");
+	precache_sound("doors/airdoor1.wav");
+	precache_sound("doors/airdoor2.wav");
+};
+
+void() info_player_start = { self.angles_y = self.angle; };
+void() info_intermission = {};
+void() info_null = { remove(self); };   // spotlight aim target
+void() light = { remove(self); };       // baked by the light tool
+`;
+
+QC["qc/client.qc"] = `// ============================================================
+// client.qc — engine entry points, spawning, the main loop glue.
+// ============================================================
+
+entity() FindSpawnPoint = {
+	local entity spot;
+	spot = find(world, classname, "info_player_start");
+	if (!spot) objerror("Map has no info_player_start!");
+	return spot;
+};
+
+void() DecodeLevelParms = {
+	if (parm1 > 0) {
+		self.health = parm1;
+		self.ammo_shells = parm2;
+	} else {
+		self.health = TUNE_MAX_HEALTH;
+		self.ammo_shells = TUNE_START_SHELLS;
+	}
+};
+
+void() PutClientInServer = {
+	local entity spot;
+	spot = FindSpawnPoint();
+	self.classname = "player";
+	self.solid = SOLID_SLIDEBOX;
+	self.movetype = MOVETYPE_WALK;
+	self.flags = FL_CLIENT;
+	self.takedamage = DAMAGE_AIM;
+	self.deadflag = DEAD_NO;
+	DecodeLevelParms();
+	self.max_health = TUNE_MAX_HEALTH;
+	self.weapon = IT_SHOTGUN;
+	self.items = IT_SHOTGUN | IT_SHELLS | IT_AXE;
+	self.armortype = 0;
+	self.armorvalue = 0;
+	self.currentammo = self.ammo_shells;
+	setmodel(self, "progs/player.mdl");
+	setsize(self, '-16 -16 -24', '16 16 32');
+	self.view_ofs = '0 0 22';
+	setorigin(self, spot.origin + '0 0 1');
+	self.angles = spot.angles;
+	self.v_angle = self.angles;
+	self.fixangle = TRUE;
+	self.velocity = '0 0 0';
+	self.punchangle = '0 0 0';
+	self.weaponmodel = "progs/v_shot.mdl";
+	self.weaponframe = 0;
+	self.attack_finished = time;
+	self.pain_finished = time;
+	self.air_finished = time + 12;
+	self.anim_frame = 0;
+	self.anim_next = 0;
+	self.frame = PF_RUN1;
+	self.th_die = player_die;
+	self.th_pain = player_pain;
+};
+
+void() RespawnPlayer = {
+	local float shells;
+	shells = self.ammo_shells;
+	parm1 = TUNE_MAX_HEALTH;
+	PutClientInServer();
+	self.ammo_shells = shells;
+	if (self.ammo_shells < 10) self.ammo_shells = 10;
+	sprint(self, PRINT_HIGH, "Back in the fight.\\n");
+};
+
+void() ClientConnect = { bprint(self.netname, " entered the slipgate\\n"); };
+void() ClientDisconnect = { bprint(self.netname, " left the slipgate\\n"); };
+void() ClientKill = { T_Damage(self, self, 9999); };
+
+void() PlayerPreThink = {
+	if (intermission_running) {
+		self.velocity = '0 0 0';
+		if (time >= intermission_end) changelevel(nextmap);
+		return;
+	}
+	if (self.deadflag) {
+		if (time >= self.respawn_at) RespawnPlayer();
+		return;
+	}
+	WaterMove();
+	if (self.button2) PlayerJump();
+	if (self.button0) W_Attack();
+	self.impulse = 0;
+};
+
+void() PlayerPostThink = {
+	if (self.deadflag) return;
+	W_WeaponFrame();
+	player_run();
+	self.currentammo = self.ammo_shells;
+};
+
+void() SetNewParms = {
+	parm1 = TUNE_MAX_HEALTH;
+	parm2 = TUNE_START_SHELLS;
+};
+
+void() SetChangeParms = {
+	parm1 = self.health;
+	if (parm1 <= 0) parm1 = TUNE_MAX_HEALTH;
+	parm2 = self.ammo_shells;
+};
+
+void() StartFrame = {};
+void() main = { dprint("slipgate progs loaded — good hunting.\\n"); };
+`;
+
+/* ---------------- tuning ---------------- */
+const TUNE_DEFS = [
+ {key:"health",  qc:"TUNE_MAX_HEALTH",   label:"Max health",      min:50,  max:200,  step:5,    def:100, unit:"hp"},
+ {key:"jump",    qc:"TUNE_JUMP_SPEED",   label:"Jump velocity",   min:200, max:400,  step:10,   def:270, unit:""},
+ {key:"pellets", qc:"TUNE_PELLETS",      label:"Shotgun pellets", min:1,   max:12,   step:1,    def:6,   unit:""},
+ {key:"pdmg",    qc:"TUNE_PELLET_DMG",   label:"Pellet damage",   min:2,   max:12,   step:1,    def:6,   unit:""},
+ {key:"delay",   qc:"TUNE_FIRE_DELAY",   label:"Fire cooldown",   min:0.2, max:1.2,  step:0.05, def:0.5, unit:"s"},
+ {key:"shells",  qc:"TUNE_START_SHELLS", label:"Starting shells", min:0,   max:100,  step:5,    def:25,  unit:""},
+ {key:"mhealth", qc:"TUNE_MON_HEALTH",   label:"Monster health",  min:20,  max:200,  step:5,    def:60,  unit:"hp"},
+ {key:"mdmg",    qc:"TUNE_MON_DAMAGE",   label:"Monster damage",  min:2,   max:25,   step:1,    def:9,   unit:""},
+ {key:"mspeed",  qc:"TUNE_MON_SPEED",    label:"Monster speed",   min:40,  max:200,  step:10,   def:90,  unit:"u/s"},
+ {key:"sight",   qc:"TUNE_MON_SIGHT",    label:"Sight range",     min:256, max:4096, step:128,  def:1536,unit:"u"},
+ {key:"hpick",   qc:"TUNE_HEALTH_AMT",   label:"Health pickup",   min:5,   max:50,   step:5,    def:25,  unit:"hp"},
+ {key:"respawn", qc:"TUNE_RESPAWN_TIME", label:"Respawn delay",   min:1,   max:10,   step:0.5,  def:3,   unit:"s"},
+ {key:"monsters",qc:"TUNE_MONSTERS_ON",  label:"Monsters enabled",toggle:true, def:1},
+ {key:"infammo", qc:"TUNE_DEV_INFINITE_AMMO", label:"Infinite ammo (dev)", toggle:true, def:0},
+];
+const tune = {};
+TUNE_DEFS.forEach(d => tune[d.key] = d.def);
+
+function fmtNum(v){ return (Math.round(v*100)/100).toString(); }
+function tuningSource(){
+	let s = `// ============================================================\n// tuning.qc — LIVE game-feel values. Generated by the Slipgate\n// Kit tuning panel; safe to hand-edit too. Every gameplay number\n// lives here so balancing never touches logic files.\n// ============================================================\n\n`;
+	s += `// ---- player ----\n`;
+	TUNE_DEFS.slice(0,6).forEach(d => { s += `float ${d.qc} = ${fmtNum(tune[d.key])};  // ${d.label}\n`; });
+	s += `\n// ---- stalker ----\n`;
+	TUNE_DEFS.slice(6,10).forEach(d => { s += `float ${d.qc} = ${fmtNum(tune[d.key])};  // ${d.label}\n`; });
+	s += `\n// ---- items & flow ----\n`;
+	TUNE_DEFS.slice(10,12).forEach(d => { s += `float ${d.qc} = ${fmtNum(tune[d.key])};  // ${d.label}\n`; });
+	s += `\n// ---- switches (0 / 1) ----\n`;
+	TUNE_DEFS.slice(12).forEach(d => { s += `float ${d.qc} = ${fmtNum(tune[d.key])};  // ${d.label}\n`; });
+	return s;
+}
+QC["qc/tuning.qc"] = tuningSource();
+
+/* ---------------- the map (built programmatically = correct brushes) ---------------- */
+function brush(x0,y0,z0,x1,y1,z1,tex){
+	const f = [
+		[[x0,y0,z1],[x1,y0,z1],[x0,y1,z1]],
+		[[x0,y0,z0],[x0,y1,z0],[x1,y0,z0]],
+		[[x0,y0,z0],[x1,y0,z0],[x0,y0,z1]],
+		[[x0,y1,z0],[x0,y1,z1],[x1,y1,z0]],
+		[[x0,y0,z0],[x0,y0,z1],[x0,y1,z0]],
+		[[x1,y0,z0],[x1,y1,z0],[x1,y0,z1]]
+	];
+	return "{\n" + f.map(p => p.map(q => `( ${q[0]} ${q[1]} ${q[2]} )`).join(" ") + ` ${tex} 0 0 0 1 1`).join("\n") + "\n}\n";
+}
+const WORLD_BRUSHES = [
+	[-272,-208,-16, 272,336,0,   "sg_floor"],   // floor (arena + exit corridor)
+	[-272,-208,192, 272,336,208, "sg_trim"],    // ceiling
+	[-272,-208,0,  272,-192,192, "sg_brick"],   // south wall
+	[-272,-208,0, -256,336,192,  "sg_brick"],   // west wall
+	[256,-208,0,   272,336,192,  "sg_brick"],   // east wall
+	[-272,192,0,   -48,208,192,  "sg_brick"],   // north wall, left of door
+	[48,192,0,     272,208,192,  "sg_brick"],   // north wall, right of door
+	[-48,192,128,  48,208,192,   "sg_metal"],   // header above door
+	[-64,208,0,    -48,336,192,  "sg_metal"],   // corridor west
+	[48,208,0,     64,336,192,   "sg_metal"],   // corridor east
+	[-64,320,0,    64,336,192,   "sg_rune"],    // corridor end — the slipgate wall
+	[-144,-80,0,  -112,-48,192,  "sg_metal"],   // pillar A
+	[112,48,0,     144,80,192,   "sg_metal"],   // pillar B
+	[-232,-160,0, -184,-112,48,  "sg_crate"],   // crate stack
+];
+const MAP_SRC =
+`// ============================================================
+// starter.map — graybox arena: fight 2 stalkers, grab loot,
+// step to the north door (it opens), reach the rune wall exit.
+// Open in TrenchBroom (game: Quake). Textures: slipgate.wad.
+// Compile: qbsp -wadpath . starter.map  ->  vis  ->  light
+// ============================================================
+{
+"classname" "worldspawn"
+"wad" "slipgate.wad"
+"message" "Slipgate Starter"
+` + WORLD_BRUSHES.map(b => brush(...b)).join("") + `}
+{
+"classname" "func_door"
+"targetname" "exitdoor"
+"angle" "-1"
+"speed" "100"
+"wait" "4"
+"lip" "4"
+` + brush(-48,192,0, 48,208,128, "sg_metal") + `}
+{
+"classname" "trigger_multiple"
+"target" "exitdoor"
+"wait" "1"
+` + brush(-96,128,0, 96,192,64, "trigger") + `}
+{
+"classname" "trigger_changelevel"
+"map" "starter"
+` + brush(-40,288,0, 40,320,64, "trigger") + `}
+{
+"classname" "info_player_start"
+"origin" "-192 -128 32"
+"angle" "45"
+}
+{
+"classname" "info_intermission"
+"origin" "0 300 56"
+"angle" "270"
+}
+{
+"classname" "monster_stalker"
+"origin" "128 96 32"
+}
+{
+"classname" "monster_stalker"
+"origin" "-96 96 32"
+}
+{
+"classname" "item_health1"
+"origin" "-224 160 8"
+}
+{
+"classname" "item_health1"
+"origin" "224 -160 8"
+}
+{
+"classname" "item_shells"
+"origin" "224 160 8"
+}
+{
+"classname" "item_shells"
+"origin" "0 -160 8"
+}
+{
+"classname" "weapon_shotgun"
+"origin" "0 0 8"
+}
+{
+"classname" "light"
+"origin" "0 0 176"
+"light" "260"
+}
+{
+"classname" "light"
+"origin" "-160 -96 176"
+"light" "190"
+}
+{
+"classname" "light"
+"origin" "160 96 176"
+"light" "190"
+}
+{
+"classname" "light"
+"origin" "0 150 176"
+"light" "160"
+}
+{
+"classname" "light"
+"origin" "0 268 160"
+"light" "220"
+}
+`;
+
+/* ---------------- textures: canvas patterns -> WAD2 + PNG overrides ---------------- */
+const GRAYS = [0,15,31,47,63,75,91,107,123,139,155,171,187,203,219,235];
+function mulberry(seed){ return function(){ seed|=0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed>>>15, 1|seed); t = t + Math.imul(t ^ t>>>7, 61|t) ^ t; return ((t ^ t>>>14)>>>0)/4294967296; }; }
+const TEX_PATTERNS = {
+	sg_brick(ctx,s,rnd){
+		ctx.fillStyle="#2a1c12"; ctx.fillRect(0,0,s,s);
+		const bh=s/8, bw=s/4;
+		for(let r=0;r<8;r++) for(let c=-1;c<5;c++){
+			const off=(r%2)*bw/2, x=c*bw+off, y=r*bh;
+			const v=44+rnd()*26;
+			ctx.fillStyle=`rgb(${v+34},${v*0.62},${v*0.4})`;
+			ctx.fillRect(x+1.5,y+1.5,bw-3,bh-3);
+			ctx.fillStyle="rgba(255,180,110,.14)"; ctx.fillRect(x+1.5,y+1.5,bw-3,2);
+			ctx.fillStyle="rgba(0,0,0,.3)"; ctx.fillRect(x+1.5,y+bh-3.5,bw-3,2);
+		}
+		for(let i=0;i<s*2;i++){ ctx.fillStyle=`rgba(0,0,0,${rnd()*.25})`; ctx.fillRect(rnd()*s,rnd()*s,1.5,1.5); }
+	},
+	sg_metal(ctx,s,rnd){
+		ctx.fillStyle="#3d4148"; ctx.fillRect(0,0,s,s);
+		const p=s/2;
+		for(let y=0;y<2;y++) for(let x=0;x<2;x++){
+			const g=ctx.createLinearGradient(x*p,y*p,x*p+p,y*p+p);
+			g.addColorStop(0,"#4a4f58"); g.addColorStop(1,"#31353c");
+			ctx.fillStyle=g; ctx.fillRect(x*p+2,y*p+2,p-4,p-4);
+			ctx.strokeStyle="#1e2126"; ctx.lineWidth=2; ctx.strokeRect(x*p+2,y*p+2,p-4,p-4);
+			ctx.fillStyle="#6a707c";
+			[[8,8],[p-8,8],[8,p-8],[p-8,p-8]].forEach(q=>{ ctx.beginPath(); ctx.arc(x*p+q[0],y*p+q[1],s/42,0,7); ctx.fill(); });
+		}
+		for(let i=0;i<10;i++){ ctx.strokeStyle=`rgba(200,210,225,${rnd()*.12})`; ctx.beginPath(); const x=rnd()*s,y=rnd()*s; ctx.moveTo(x,y); ctx.lineTo(x+rnd()*20-10,y+rnd()*6-3); ctx.stroke(); }
+	},
+	sg_floor(ctx,s,rnd){
+		ctx.fillStyle="#2b2723"; ctx.fillRect(0,0,s,s);
+		const t=s/4;
+		for(let y=0;y<4;y++) for(let x=0;x<4;x++){
+			const v=38+rnd()*14;
+			ctx.fillStyle=`rgb(${v},${v*0.94},${v*0.82})`;
+			ctx.fillRect(x*t+1.5,y*t+1.5,t-3,t-3);
+		}
+		ctx.strokeStyle="rgba(255,179,71,.25)"; ctx.lineWidth=2; ctx.strokeRect(1,1,s-2,s-2);
+		for(let i=0;i<s;i++){ ctx.fillStyle=`rgba(0,0,0,${rnd()*.2})`; ctx.fillRect(rnd()*s,rnd()*s,2,2); }
+	},
+	sg_trim(ctx,s,rnd){
+		ctx.fillStyle="#241a10"; ctx.fillRect(0,0,s,s);
+		for(let y=0;y<s;y+=s/8){
+			ctx.fillStyle=(y/(s/8))%2?"#6e5426":"#8a6a2f";
+			ctx.fillRect(0,y+1,s,s/8-2);
+			ctx.fillStyle="rgba(255,220,150,.18)"; ctx.fillRect(0,y+1,s,2);
+		}
+		for(let i=0;i<14;i++){ ctx.fillStyle="rgba(0,0,0,.3)"; ctx.fillRect(rnd()*s,rnd()*s,rnd()*8+2,2); }
+	},
+	sg_lava(ctx,s,rnd){
+		ctx.fillStyle="#1c0800"; ctx.fillRect(0,0,s,s);
+		for(let i=0;i<26;i++){
+			const x=rnd()*s,y=rnd()*s,r=s*(0.06+rnd()*0.14);
+			const g=ctx.createRadialGradient(x,y,0,x,y,r);
+			g.addColorStop(0,"#ffe95a"); g.addColorStop(.4,"#ff7a1a"); g.addColorStop(1,"rgba(90,10,0,0)");
+			ctx.fillStyle=g; ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill();
+		}
+		ctx.strokeStyle="rgba(20,4,0,.8)"; ctx.lineWidth=3;
+		for(let i=0;i<7;i++){ ctx.beginPath(); ctx.moveTo(rnd()*s,0); ctx.bezierCurveTo(rnd()*s,s*.3,rnd()*s,s*.7,rnd()*s,s); ctx.stroke(); }
+	},
+	sg_rune(ctx,s,rnd){
+		ctx.fillStyle="#161019"; ctx.fillRect(0,0,s,s);
+		for(let i=0;i<s;i++){ ctx.fillStyle=`rgba(120,90,160,${rnd()*.08})`; ctx.fillRect(rnd()*s,rnd()*s,2,2); }
+		const cx=s/2, cy=s/2, r=s*.34;
+		const g=ctx.createRadialGradient(cx,cy,r*.2,cx,cy,r*1.5);
+		g.addColorStop(0,"rgba(55,224,161,.5)"); g.addColorStop(1,"rgba(55,224,161,0)");
+		ctx.fillStyle=g; ctx.fillRect(0,0,s,s);
+		ctx.strokeStyle="#37e0a1"; ctx.lineWidth=s/28; ctx.lineJoin="miter";
+		ctx.beginPath();
+		for(let i=0;i<6;i++){ const a=Math.PI/3*i - Math.PI/2; const x=cx+Math.cos(a)*r, y=cy+Math.sin(a)*r; i?ctx.lineTo(x,y):ctx.moveTo(x,y); }
+		ctx.closePath(); ctx.stroke();
+		ctx.strokeStyle="#b07aff"; ctx.lineWidth=s/34;
+		ctx.beginPath(); ctx.moveTo(cx+r*.25,cy-r*.55); ctx.lineTo(cx-r*.3,cy+r*.1); ctx.lineTo(cx+r*.05,cy+r*.1); ctx.lineTo(cx-r*.25,cy+r*.55); ctx.lineTo(cx+r*.3,cy-r*.1); ctx.lineTo(cx-r*.05,cy-r*.1); ctx.closePath(); ctx.stroke();
+	},
+	sg_crate(ctx,s,rnd){
+		ctx.fillStyle="#5a4020"; ctx.fillRect(0,0,s,s);
+		for(let x=0;x<s;x+=s/4){
+			const v=80+rnd()*24;
+			ctx.fillStyle=`rgb(${v},${v*.68},${v*.36})`;
+			ctx.fillRect(x+1,0,s/4-2,s);
+			ctx.fillStyle="rgba(0,0,0,.28)";
+			for(let i=0;i<4;i++) ctx.fillRect(x+3+rnd()*(s/4-6),rnd()*s,1.5,rnd()*14+4);
+		}
+		ctx.strokeStyle="#2e2010"; ctx.lineWidth=s/16; ctx.strokeRect(2,2,s-4,s-4);
+		ctx.beginPath(); ctx.moveTo(2,2); ctx.lineTo(s-2,s-2); ctx.moveTo(s-2,2); ctx.lineTo(2,s-2); ctx.stroke();
+	},
+	trigger(ctx,s){ ctx.fillStyle="#3a0f33"; ctx.fillRect(0,0,s,s); ctx.fillStyle="#ff4dd2"; const t=s/8; for(let y=0;y<8;y++)for(let x=0;x<8;x++) if((x+y)%2)ctx.fillRect(x*t,y*t,t,t); },
+	clip(ctx,s){ ctx.fillStyle="#12233f"; ctx.fillRect(0,0,s,s); ctx.strokeStyle="#5aa7ff"; ctx.lineWidth=3; for(let i=-s;i<s*2;i+=12){ ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i+s,s); ctx.stroke(); } },
+	skip(ctx,s){ ctx.fillStyle="#0f2b1c"; ctx.fillRect(0,0,s,s); ctx.strokeStyle="#37e0a1"; ctx.lineWidth=3; ctx.strokeRect(4,4,s-8,s-8); ctx.beginPath(); ctx.moveTo(4,4); ctx.lineTo(s-4,s-4); ctx.stroke(); }
+};
+const TEX_NAMES = Object.keys(TEX_PATTERNS);
+const COLOR_TEX = ["sg_brick","sg_metal","sg_floor","sg_trim","sg_lava","sg_rune","sg_crate"];
+function drawTex(name,size){
+	const c=document.createElement("canvas"); c.width=c.height=size;
+	TEX_PATTERNS[name](c.getContext("2d"),size,mulberry(name.length*1337+size));
+	return c;
+}
+function grayIndex(r,g,b){
+	const lum=.299*r+.587*g+.114*b; let best=0,bd=1e9;
+	for(let i=0;i<16;i++){ const d=Math.abs(GRAYS[i]-lum); if(d<bd){bd=d;best=i;} }
+	return best;
+}
+function buildWad(){
+	const lumps=[], entries=[]; let offset=12;
+	for(const name of TEX_NAMES){
+		const S=64, cv=drawTex(name,S), img=cv.getContext("2d").getImageData(0,0,S,S).data;
+		const mip0=new Uint8Array(S*S);
+		for(let i=0;i<S*S;i++) mip0[i]=grayIndex(img[i*4],img[i*4+1],img[i*4+2]);
+		const mips=[mip0];
+		for(let lvl=1;lvl<4;lvl++){
+			const w=S>>lvl, m=new Uint8Array(w*w), f=1<<lvl;
+			for(let y=0;y<w;y++) for(let x=0;x<w;x++) m[y*w+x]=mip0[(y*f)*S+(x*f)];
+			mips.push(m);
+		}
+		const sizes=[S*S,S*S/4,S*S/16,S*S/64];
+		const lump=new Uint8Array(40+sizes.reduce((a,b)=>a+b,0));
+		const dv=new DataView(lump.buffer);
+		for(let i=0;i<16;i++) lump[i]=i<name.length?name.charCodeAt(i):0;
+		dv.setUint32(16,S,true); dv.setUint32(20,S,true);
+		let o=40; for(let i=0;i<4;i++){ dv.setUint32(24+i*4,o,true); lump.set(mips[i],o); o+=sizes[i]; }
+		lumps.push(lump);
+		entries.push({name,offset,size:lump.length});
+		offset+=lump.length;
+	}
+	const total=offset+entries.length*32;
+	const wad=new Uint8Array(total), dv=new DataView(wad.buffer);
+	wad.set([0x57,0x41,0x44,0x32]); // "WAD2"
+	dv.setUint32(4,entries.length,true); dv.setUint32(8,offset,true);
+	let p=12;
+	for(const l of lumps){ wad.set(l,p); p+=l.length; }
+	entries.forEach((e,i)=>{
+		const b=offset+i*32;
+		dv.setUint32(b,e.offset,true); dv.setUint32(b+4,e.size,true); dv.setUint32(b+8,e.size,true);
+		wad[b+12]=0x42; // miptex
+		for(let j=0;j<16;j++) wad[b+16+j]=j<e.name.length?e.name.charCodeAt(j):0;
+	});
+	return wad;
+}
+const WAD_BYTES = buildWad();
+
+/* ---------------- docs, scripts, prompts ---------------- */
+const PROMPT_SYSTEM = `You are my QuakeC programmer. I cannot code — you write ALL code and give me exact, complete instructions.
+
+PROJECT FACTS (never contradict these):
+- Engine: vkQuake (vanilla Quake / id Tech 2 source port), Windows + Linux.
+- Language: vanilla QuakeC compiled with FTEQCC. NO FTE-only extensions (no CSQC, no IQM, no #pragma tricks, no engine C edits). If a feature needs engine changes, propose a QuakeC workaround instead.
+- Animation: we use NUMERIC frame indices from qc/frames.qc, never $frame macros (so the compiler needs no .mdl files).
+- Assets: id-standard filenames supplied by LibreQuake in id1/ (progs/player.mdl, progs/v_shot.mdl, progs/g_shot.mdl, progs/soldier.mdl, maps/b_bh25.bsp, maps/b_shell0.bsp, stock sound paths). Never invent asset paths; if a new asset is needed, tell me the exact filename to create and where to put it.
+- All gameplay numbers live in qc/tuning.qc as TUNE_* floats. Never hardcode balance values in logic files.
+- File list: progs.src, defs.qc, frames.qc, tuning.qc, subs.qc, combat.qc, items.qc, weapons.qc, player.qc, monsters.qc, doors.qc, triggers.qc, world.qc, client.qc. New files must be added to progs.src in dependency order.
+- Build: fteqcc progs.src inside qc/ (output progs.dat copied to mod root). Map: qbsp -wadpath . starter.map, then vis, then light, inside maps/.
+- Launch: vkquake -game slipgate +map starter.
+
+HOW TO ANSWER:
+1. Give COMPLETE replacement file contents (never fragments or "// rest unchanged").
+2. Say exactly which file each block replaces.
+3. End with: build step, launch step, and a 3-line test checklist I can verify in-game.
+4. Keep changes minimal — one feature per request.
+5. Explain what changed in one plain-language sentence. No jargon without a gloss.
+6. If you are unsure about a builtin number or engine behavior, say so and choose the conservative vanilla option.`;
+
+const PROMPT_TASK = `TASK: {{FEATURE}}
+
+CONTEXT:
+- Current behavior: [describe what happens in-game now]
+- Desired behavior: [describe exactly what should happen instead]
+- Files you will probably touch: [guess, or write "you decide"]
+
+CONSTRAINTS:
+- Vanilla QuakeC only; values go in tuning.qc; numeric frames only.
+- Do not break: shotgun firing, stalker AI, the exit door, respawn, the exit trigger.
+
+ACCEPTANCE TEST (write code so this passes):
+1. [what I should see/do in-game]
+2. [expected result]
+3. [expected result]
+
+Reply with complete file contents + build/test steps, per the system prompt.`;
+
+const PROMPT_DEBUG = `BUG REPORT — fix with the smallest possible change.
+
+What I did: [exact steps, e.g. "ran build.bat, then launch.bat, walked to the door"]
+Expected: [what should happen]
+Actual: [what happens instead]
+
+FULL error text, verbatim (compiler output, engine console, or crash message):
+[paste EVERYTHING between the lines]
+----
+[paste here]
+----
+
+Recent changes: [files the LLM last edited, or "none — first run"]
+My setup: [Windows or Linux, vkQuake version, LibreQuake version]
+
+First explain the cause in one sentence, then give the complete corrected file(s) and the rebuild steps. If the error mentions a missing model or sound, prefer a fix that does not require new assets.`;
+
+const PROMPT_ASSET = `ASSET CONVERSION — help me replace a stock asset with my itch.io pack.
+
+Asset: [pack name + link]
+License on the pack page: [e.g. CC0 / CC-BY / "free for any use"]
+Files in the pack: [e.g. .fbx + .png textures, or .obj, or .wav]
+Target: replace [e.g. the stalker monster / shotgun viewmodel / a wall texture / a sound]
+
+Walk me through, click by click:
+1. Blender import settings for this format, and the export settings for the Quake MDL plugin (scale, origin, animation baking, triangle/vertex limits for low-poly).
+2. Exact output filename + destination folder so the game picks it up WITHOUT code changes (id-standard naming), or the exact QC lines to change if renaming is unavoidable.
+3. If frame order changed: give me the new numbers for qc/frames.qc.
+4. Texture rules: size (power of two), and how external PNG overrides in textures/ work in vkQuake.
+5. Sound rules: WAV, mono, 22050 Hz; music goes in id1/music as trackNN.ogg.
+6. The exact row to add to CREDITS.md for this pack's license.
+Assume I have never opened Blender before.`;
+
+const README = `# SLIPGATE//KIT — a vkQuake starter mod
+
+A complete, compile-ready skeleton for a classic-Quake FPS. One weapon
+(the shotgun), one enemy (the stalker), items, a trigger-opened door,
+an exit that loops the level, auto-respawn, and a graybox arena map
+with generated textures. Free, hobby-friendly, Windows + Linux.
+
+## What is inside
+
+    slipgate/
+      qc/            14 QuakeC sources + progs.src (the whole game logic)
+      maps/          starter.map (TrenchBroom source) + slipgate.wad (textures)
+      textures/      full-color PNG overrides vkQuake loads automatically
+      docs/          ASSETS.md (itch.io pipeline) + PROMPTS.md (LLM pack)
+      build.bat/.sh  compiles progs.dat and starter.bsp
+      launch.bat/.sh runs the game
+      quake.rc       sane default config
+      CREDITS.md     license notices — keep adding to it
+      LICENSE        MIT for the kit code itself
+
+## Requirements (all free)
+
+1. vkQuake — https://github.com/Novum/vkQuake/releases
+   Windows: installer (needs the MS VC++ redistributable, linked on the
+   release page). Linux: AppImage (chmod +x, needs glibc 2.35+, FUSE).
+   Any Vulkan-capable GPU from the last decade works.
+2. LibreQuake — https://github.com/lavenderdotpet/LibreQuake/releases
+   Put its .pak files into the id1/ folder next to the vkQuake executable.
+   This is your free base content: player, weapons, monsters, sounds, HUD.
+   NEVER copy id Software's commercial Quake .pak files into a release.
+3. FTEQCC — https://www.fteqcc.org/  (get the GUI build; put fteqcc.exe
+   in slipgate/tools/ or add it to PATH)
+4. ericw-tools — https://github.com/ericwa/ericw-tools/releases
+   (qbsp, vis, light — add the bin folder to PATH)
+5. TrenchBroom — https://github.com/TrenchBroom/TrenchBroom/releases
+6. Later, for custom models: Blender + the MDL import/export plugin
+   https://github.com/robrohan/blender_ie_quake_mdl
+
+## Quickstart
+
+Windows:
+    1. Unzip this kit next to id1/ so you have: vkquake.exe, id1/, slipgate/
+    2. Double-click build.bat   (compiles QC + map)
+    3. Double-click launch.bat  (play)
+
+Linux:
+    1. Same layout; AppImage named vkquake.AppImage next to id1/
+    2. chmod +x build.sh launch.sh vkquake.AppImage
+    3. ./build.sh && ./launch.sh
+
+In TrenchBroom: choose game "Quake", point it at your vkQuake folder,
+open maps/starter.map, and add maps/slipgate.wad in the map's wad list.
+
+## The dev loop (you + your LLM)
+
+    edit qc/*.qc (LLM writes) -> build -> launch -> test -> git commit
+
+Paste docs/PROMPTS.md #1 into your LLM's project instructions ONCE.
+Use prompt #2 for features, #3 for errors, #4 for asset conversion.
+Commit every working state: git init, git add -A, git commit.
+When the LLM breaks something, roll back instead of debugging blind.
+
+## Swapping in itch.io assets
+
+The kit uses id-standard filenames, so replacing a file with the same
+name changes the game with ZERO code edits:
+
+    progs/player.mdl    your body (third person / death cam)
+    progs/v_shot.mdl    shotgun viewmodel
+    progs/g_shot.mdl    shotgun pickup
+    progs/soldier.mdl   the stalker monster
+    maps/b_bh25.bsp     health pickup      maps/b_shell0.bsp  shells
+    sound paths         see precache lists in qc/world.qc + monsters.qc
+
+Models: low-poly MDL (Blender plugin). Keep animations in the first
+frames or update qc/frames.qc. Textures: the PNGs in textures/ override
+the graybox wad in-game — replace them with your pack's art (power-of-two
+sizes). Sounds: WAV mono 22050 Hz. Music: id1/music/track02.ogg etc.
+Log EVERY pack's license in CREDITS.md as you download it.
+
+## Tuning
+
+All balance lives in qc/tuning.qc (TUNE_* values) — the web workbench
+generates this file from sliders. Change numbers, rebuild, feel it.
+
+## Troubleshooting
+
+    "progs.dat not found"        run build first; check qc/progs.dat exists
+    "couldn't load progs/X.mdl"  LibreQuake missing/incomplete in id1/, or a
+                                 typo in a precache path. Monsters can be
+                                 switched off in tuning.qc while you fix art.
+    "couldn't load sound X"      same: base content gap — fix the path in
+                                 world.qc / monsters.qc to a file you have
+    "no spawn function for X"    entity classname typo in the .map
+    fteqcc errors                paste verbatim into LLM prompt #3
+    Vulkan init failure          update GPU drivers; try another port
+                                 (Ironwail) to confirm the data is fine
+    Textures look gray           PNG overrides not found — the wad graybox
+                                 still works; check textures/ folder names
+
+## Licenses
+
+Kit code: MIT (LICENSE). vkQuake: GPL-2.0-or-later — if you redistribute
+its binaries, include the license and a link to its source. LibreQuake:
+BSD-3-Clause — keep its attribution. Your itch.io packs: per-pack terms.
+See CREDITS.md. Not affiliated with id Software.
+`;
+
+const ASSETS_DOC = `# ASSET PIPELINE — itch.io to Quake
+
+## Models (low-poly is perfect for Quake)
+1. Buy/download a pack. Check the license FIRST (CC0 = easiest;
+   CC-BY = fine + credit; avoid NC if you might ever sell the game).
+2. Blender: File > Import your format (FBX/OBJ/glTF all work).
+3. Install the MDL plugin: https://github.com/robrohan/blender_ie_quake_mdl
+   Edit > Preferences > Add-ons > Install > pick the plugin zip > enable.
+4. Scale sanity: the Quake player is 56 units tall (1 unit ~ 1 inch).
+   Apply transforms (Ctrl+A > All Transforms) before export.
+5. Export MDL. Keep it under ~1000 triangles for the classic look.
+   Animations bake to vertex frames — keep the ones you need, in order.
+6. Name the output EXACTLY like the file it replaces (see README table)
+   and drop it into slipgate/progs/ — mod files override id1 files.
+7. Frame order changed? Update qc/frames.qc (numeric indices). Use
+   LLM prompt #4 and tell it the frame list from Blender.
+
+## Textures
+- In-game overrides: put PNG/TGA files in slipgate/textures/ named after
+  the texture (sg_brick.png ...). vkQuake loads them over the wad.
+  Sizes: power of two (64/128/256/512). This is the easy path.
+- New map textures: add them to a WAD2 for TrenchBroom + qbsp. Ask the
+  LLM to walk you through a wad tool; keep names lowercase, max 15 chars.
+
+## Sounds & music
+- Sounds: WAV, mono, 22050 Hz (44100 works too). Replace stock paths or
+  add new ones + a precache_sound line in world.qc.
+- Music: OGG named track02.ogg, track03.ogg ... in id1/music/ (or
+  slipgate/music/). Maps reference tracks by number ("sounds" key on
+  worldspawn, e.g. "sounds" "2").
+
+## License hygiene
+Every download gets a row in CREDITS.md: pack, author, link, license,
+what you used it for. Do it AT DOWNLOAD TIME, not at release time.
+`;
+
+const BUILD_BAT = `@echo off
+setlocal
+cd /d "%~dp0"
+echo === SLIPGATE KIT BUILD ===
+
+set "QCC=fteqcc"
+where fteqcc >nul 2>nul
+if errorlevel 1 (
+  if exist "tools\\fteqcc.exe" (set "QCC=tools\\fteqcc.exe") else (
+    echo [!] fteqcc not found. Put fteqcc.exe in tools\\ or add it to PATH.
+    echo     Download: https://www.fteqcc.org/
+    goto :fail
+  )
+)
+
+pushd qc
+"%QCC%" progs.src
+if errorlevel 1 (popd & goto :fail)
+copy /y progs.dat ..\\progs.dat >nul
+popd
+echo [ok] progs.dat built
+
+where qbsp >nul 2>nul
+if errorlevel 1 (
+  echo [skip] qbsp not in PATH - map not compiled.
+  echo        ericw-tools: https://github.com/ericwa/ericw-tools/releases
+  goto :done
+)
+pushd maps
+qbsp -wadpath . starter.map
+if errorlevel 1 (popd & goto :fail)
+vis starter.bsp
+light starter.bsp
+popd
+echo [ok] starter.bsp built
+
+:done
+echo Done. Run launch.bat
+exit /b 0
+:fail
+echo Build FAILED - paste the error into LLM prompt #3 (docs/PROMPTS.md)
+exit /b 1
+`;
+
+const BUILD_SH = `#!/bin/sh
+# SLIPGATE KIT BUILD (Linux)
+cd "$(dirname "$0")" || exit 1
+echo "=== SLIPGATE KIT BUILD ==="
+
+QCC=fteqcc
+if ! command -v fteqcc >/dev/null 2>&1; then
+  if [ -x tools/fteqcc ]; then QCC=tools/fteqcc; else
+    echo "[!] fteqcc not found. Put it in tools/ or add it to PATH."
+    echo "    Download: https://www.fteqcc.org/"
+    exit 1
+  fi
+fi
+
+(cd qc && "$QCC" progs.src) || exit 1
+cp qc/progs.dat progs.dat || exit 1
+echo "[ok] progs.dat built"
+
+if ! command -v qbsp >/dev/null 2>&1; then
+  echo "[skip] qbsp not in PATH - map not compiled."
+  echo "       ericw-tools: https://github.com/ericwa/ericw-tools/releases"
+else
+  (cd maps && qbsp -wadpath . starter.map && vis starter.bsp && light starter.bsp) || exit 1
+  echo "[ok] starter.bsp built"
+fi
+echo "Done. Run ./launch.sh"
+`;
+
+const LAUNCH_BAT = `@echo off
+cd /d "%~dp0"
+rem Expected layout: vkquake.exe and id1\\ live one folder up.
+set "VK=..\\vkquake.exe"
+if not exist "%VK%" set "VK=vkquake"
+start "" "%VK%" -game slipgate +map starter
+`;
+
+const LAUNCH_SH = `#!/bin/sh
+# Expected layout: vkquake.AppImage (or vkquake in PATH) next to id1/
+cd "$(dirname "$0")/.." || exit 1
+if [ -x ./vkquake.AppImage ]; then VK=./vkquake.AppImage
+elif command -v vkquake >/dev/null 2>&1; then VK=vkquake
+else echo "Put vkquake.AppImage next to id1/ or install vkquake in PATH"; exit 1; fi
+exec "$VK" -game slipgate +map starter
+`;
+
+const QUAKE_RC = `// Slipgate Kit defaults — executed at startup instead of id1/quake.rc
+exec default.cfg
+crosshair "1"
+sensitivity "3"
+scr_conspeed "2000"
+exec config.cfg
+exec autoexec.cfg
+stuffcmds
+`;
+
+const GITIGNORE = `config.cfg
+autoexec.cfg
+*.log
+stdout.txt
+stderr.txt
+qc/*.lno
+maps/*.prt
+maps/*.pts
+maps/*.texinfo.json
+`;
+
+const LICENSE_TXT = `MIT License
+
+Copyright (c) 2026 Slipgate Kit contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+NOTE: This license covers the ORIGINAL kit code only.
+- vkQuake is GPL-2.0-or-later (https://github.com/Novum/vkQuake).
+- LibreQuake content is BSD-3-Clause (keep its notices).
+- itch.io assets keep their own per-pack licenses — log them in CREDITS.md.
+`;
+
+function creditsMd(){
+	return `# CREDITS & LICENSE LOG
+
+## Engine
+vkQuake by Novum and contributors — GPL-2.0-or-later.
+Source: https://github.com/Novum/vkQuake
+(If you redistribute vkQuake binaries, include its license and this link.)
+
+## Base game content
+LibreQuake — BSD-3-Clause. https://github.com/lavenderdotpet/LibreQuake
+Include the LibreQuake copyright notice with any distribution of its data.
+
+## Kit code
+Slipgate Kit — MIT (see LICENSE).
+
+## My itch.io / third-party packs
+Add one row PER DOWNLOAD, at download time:
+
+| Pack | Author | Link | License | Used for |
+|------|--------|------|---------|----------|
+| (example) PSX Dungeon Pack | someartist | https://... | CC-BY 4.0 | wall textures |
+| | | | | |
+
+## Music
+| Track | Author | Link | License |
+|-------|--------|------|---------|
+| | | | |
+`;
+}
+function promptsMd(){
+	return `# LLM PROMPT PACK\n\nPaste #1 into your LLM project instructions once. Use the rest as templates.\n\n## 1 — SYSTEM / PROJECT CONTEXT\n\n${PROMPT_SYSTEM}\n\n## 2 — FEATURE TASK\n\n${PROMPT_TASK}\n\n## 3 — DEBUG / ERROR\n\n${PROMPT_DEBUG}\n\n## 4 — ASSET CONVERSION\n\n${PROMPT_ASSET}\n`;
+}
+
+/* ---------------- file registry ---------------- */
+const FILES = [];
+function addFile(path, content, lang, opts){ FILES.push(Object.assign({path, content, lang, orig:content}, opts||{})); }
+addFile("README.md", README, "md");
+addFile("LICENSE", LICENSE_TXT, "txt");
+addFile("CREDITS.md", creditsMd(), "md");
+addFile("quake.rc", QUAKE_RC, "cfg");
+addFile(".gitignore", GITIGNORE, "cfg");
+addFile("build.bat", BUILD_BAT, "sh");
+addFile("build.sh", BUILD_SH, "sh");
+addFile("launch.bat", LAUNCH_BAT, "sh");
+addFile("launch.sh", LAUNCH_SH, "sh");
+addFile("docs/ASSETS.md", ASSETS_DOC, "md");
+addFile("docs/PROMPTS.md", promptsMd(), "md");
+Object.keys(QC).forEach(p => addFile(p, QC[p], p.endsWith(".src") ? "src" : "qc"));
+addFile("maps/starter.map", MAP_SRC, "map");
+addFile("maps/slipgate.wad", null, "wad", {binary:WAD_BYTES});
+COLOR_TEX.forEach(n => addFile("textures/"+n+".png", null, "png", {tex:n}));
+
+const byPath = p => FILES.find(f => f.path === p);
+const GROUPS = [
+	{label:"slipgate /", match:p => !p.includes("/")},
+	{label:"qc/", match:p => p.startsWith("qc/")},
+	{label:"maps/", match:p => p.startsWith("maps/")},
+	{label:"textures/", match:p => p.startsWith("textures/")},
+	{label:"docs/", match:p => p.startsWith("docs/")},
+];
+const LANG_NAME = {qc:"QuakeC", src:"progs.src", md:"Markdown", sh:"Script", cfg:"Config", map:"Quake MAP", wad:"WAD2 binary", png:"PNG texture", txt:"Text"};
+function fileIcon(f){
+	if(f.lang==="qc"||f.lang==="src") return ["▣","ic-qc"];
+	if(f.lang==="md"||f.lang==="txt") return ["¶","ic-md"];
+	if(f.lang==="sh") return ["$","ic-sh"];
+	if(f.lang==="map") return ["▦","ic-map"];
+	if(f.lang==="wad"||f.lang==="png") return ["▩","ic-bin"];
+	return ["·","ic-cfg"];
+}
+
+/* ---------------- state ---------------- */
+const state = { active:"qc/tuning.qc", editing:false, sound:true, query:"" };
+const $ = id => document.getElementById(id);
+
+/* ---------------- audio ---------------- */
+let AC = null;
+function ac(){ if(!AC){ try{ AC = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(AC && AC.state==="suspended") AC.resume(); return AC; }
+function blip(freq, dur, type, vol, when){
+	if(!state.sound) return;
+	const ctx = ac(); if(!ctx) return;
+	const t = ctx.currentTime + (when||0);
+	const o = ctx.createOscillator(), g = ctx.createGain();
+	o.type = type||"square"; o.frequency.value = freq;
+	g.gain.setValueAtTime(0.0001,t);
+	g.gain.exponentialRampToValueAtTime(vol||0.06, t+0.008);
+	g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+	o.connect(g); g.connect(ctx.destination);
+	o.start(t); o.stop(t+dur+0.02);
+}
+const sfx = {
+	copy(){ blip(1240,.05,"square",.05); blip(1660,.05,"square",.04,.05); },
+	open(){ blip(760,.035,"triangle",.045); },
+	toggle(){ blip(520,.05,"triangle",.05); },
+	dl(){ blip(392,.09,"square",.055); blip(523,.09,"square",.055,.09); blip(784,.14,"square",.06,.18); },
+	err(){ blip(170,.12,"sawtooth",.05); },
+	tick(){ blip(980,.02,"square",.025); }
+};
+
+/* ---------------- toasts ---------------- */
+function toast(msg, opts){
+	opts = opts||{};
+	const el = document.createElement("div");
+	el.className = "toast" + (opts.warn?" warn":"");
+	const span = document.createElement("span"); span.textContent = msg; el.appendChild(span);
+	if(opts.undo){
+		const b = document.createElement("button"); b.className="undo"; b.textContent="UNDO";
+		b.onclick = ()=>{ opts.undo(); kill(); toast("Restored."); };
+		el.appendChild(b);
+	}
+	$("toasts").appendChild(el);
+	let killed=false;
+	function kill(){ if(killed) return; killed=true; el.classList.add("out"); setTimeout(()=>el.remove(),350); }
+	setTimeout(kill, opts.undo?6000:3200);
+}
+
+/* ---------------- clipboard ---------------- */
+function copyText(text, label){
+	function done(){ sfx.copy(); toast("Copied " + label); }
+	function fallback(){
+		const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
+		document.body.appendChild(ta); ta.select();
+		try{ document.execCommand("copy"); done(); }catch(e){ sfx.err(); toast("Copy failed — select manually", {warn:true}); }
+		ta.remove();
+	}
+	if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+	else fallback();
+}
+
+/* ---------------- syntax highlighting ---------------- */
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+const QC_KW = /\b(void|float|vector|entity|string|local|if|else|while|return|continue|break)\b/;
+const QC_BI = /\b(makevectors|setorigin|setmodel|setsize|random|sound|normalize|objerror|vlen|vectoyaw|remove|traceline|checkclient|find|precache_sound|precache_model|bprint|sprint|dprint|ftos|vtos|walkmove|droptofloor|floor|fabs|cvar|particle|ChangeYaw|changelevel|centerprint)\b/;
+function highlight(src, lang){
+	let pattern;
+	if(lang==="qc"||lang==="src"){
+		pattern = /(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|("(?:[^"\\\n]|\\.)*")|(\b\d+(?:\.\d+)?\b)|(\b(?:void|float|vector|entity|string|local|if|else|while|return|continue|break)\b)|(\b(?:makevectors|setorigin|setmodel|setsize|random|sound|normalize|objerror|vlen|vectoyaw|remove|traceline|checkclient|find|precache_sound|precache_model|bprint|sprint|dprint|ftos|vtos|walkmove|droptofloor|floor|fabs|cvar|particle|ChangeYaw|changelevel|centerprint)\b)|(\b(?:TUNE_[A-Z_]+|IT_[A-Z_]+|FL_[A-Z_]+|SOLID_[A-Z_]+|MOVETYPE_[A-Z_]+|CHAN_[A-Z_]+|ATTN_[A-Z_]+|CONTENT_[A-Z_]+|DEAD_[A-Z_]+|DAMAGE_[A-Z_]+|PRINT_[A-Z_]+|TRUE|FALSE|PF_[A-Z_0-9]+|VF_[A-Z_0-9]+|MS_[A-Z_0-9]+)\b)|(#[0-9]+)/g;
+	} else if(lang==="sh"||lang==="cfg"){
+		pattern = /((?:^|\s)(?:rem|echo|REM|ECHO)\b[^\n]*|#[^\n]*|\/\/[^\n]*)|("(?:[^"\\\n]|\\.)*")|(\b\d+(?:\.\d+)?\b)|(\b(?:if|else|set|setlocal|cd|pushd|popd|copy|start|where|exit|goto|command|exec|cp|chmod|then|fi|do|done)\b)|(%[A-Za-z_~0-9]+%|\$[A-Za-z_{}()0-9]+|:[a-z]+)/g;
+	} else if(lang==="map"){
+		pattern = /(\/\/[^\n]*)|("(?:[^"\\\n]|\\.)*")|(-?\b\d+(?:\.\d+)?\b)|(\b(?:sg_[a-z]+|trigger|clip|skip)\b)/g;
+	} else {
+		pattern = /(^#{1,6}[^\n]*|\[[^\]]*\]\([^)]*\))|(\*\*[^*]+\*\*)|(https?:\/\/[^\s)]+)/g;
+	}
+	let out="", last=0, m;
+	const classes = lang==="md" ? ["tok-t","tok-f","tok-b"] :
+		(lang==="map" ? ["tok-c","tok-s","tok-n","tok-t"] :
+		(lang==="sh"||lang==="cfg" ? ["tok-c","tok-s","tok-n","tok-k","tok-t"] :
+		["tok-c","tok-s","tok-n","tok-k","tok-b","tok-t","tok-f"]));
+	while((m = pattern.exec(src))){
+		out += esc(src.slice(last, m.index));
+		let cls = "tok-k";
+		for(let g=1; g<m.length; g++){ if(m[g]!==undefined){ cls = classes[g-1]||"tok-k"; break; } }
+		out += '<span class="'+cls+'">'+esc(m[0])+"</span>";
+		last = m.index + m[0].length;
+	}
+	out += esc(src.slice(last));
+	return out;
+}
+
+/* ---------------- tree + viewer ---------------- */
+function renderTree(){
+	const tree = $("tree"); tree.innerHTML = "";
+	const q = state.query.toLowerCase();
+	let shown = 0;
+	GROUPS.forEach(g => {
+		const items = FILES.filter(f => g.match(f.path) && (!q || f.path.toLowerCase().includes(q)));
+		if(!items.length) return;
+		shown += items.length;
+		const grp = document.createElement("div"); grp.className = "tgroup";
+		const head = document.createElement("button");
+		head.innerHTML = '<span class="arr">▼</span> ' + esc(g.label) + ' <span style="margin-left:auto;color:var(--dim)">'+items.length+'</span>';
+		head.onclick = ()=>{ grp.classList.toggle("closed"); sfx.tick(); };
+		grp.appendChild(head);
+		const wrap = document.createElement("div"); wrap.className = "titems";
+		items.forEach(f => {
+			const b = document.createElement("button");
+			b.className = "titem" + (f.path===state.active?" active":"");
+			const [ic, cls] = fileIcon(f);
+			const name = f.path.includes("/") ? f.path.split("/").slice(1).join("/") : f.path;
+			b.innerHTML = '<span class="ic '+cls+'">'+ic+'</span><span class="nm">'+esc(name)+'</span>' + (f.content!==f.orig && !f.binary && !f.tex ? '<span class="mod" title="modified"></span>' : (f.path==="qc/tuning.qc"&&f.content!==f.orig?'<span class="mod"></span>':""));
+			b.onclick = ()=>{ state.active = f.path; state.editing=false; renderTree(); renderViewer(); sfx.open(); };
+			wrap.appendChild(b);
+		});
+		grp.appendChild(wrap);
+		tree.appendChild(grp);
+	});
+	$("fileCount").textContent = shown + " / " + FILES.length + " files";
+}
+function lineCount(s){ return s.split("\n").length; }
+function renderViewer(){
+	const f = byPath(state.active);
+	$("vwPath").textContent = "slipgate/" + f.path;
+	$("vwLang").textContent = LANG_NAME[f.lang]||f.lang;
+	const wrapEl = $("codeWrap");
+	wrapEl.innerHTML = "";
+	const editable = !f.binary && !f.tex;
+	$("vwEdit").style.display = editable ? "" : "none";
+	$("vwCopy").style.display = editable ? "" : "none";
+	$("vwReset").style.display = (editable && f.content!==f.orig) ? "" : "none";
+	$("vwEdited").hidden = !(editable && f.content!==f.orig);
+	if(f.binary){
+		$("vwLines").textContent = (f.binary.length/1024).toFixed(1)+" KB";
+		const div = document.createElement("div"); div.className="binview";
+		const info = document.createElement("div"); info.className="bininfo";
+		info.textContent = "WAD2 texture archive — generated in your browser, "+TEX_NAMES.length+" miptextures (64×64, 4 mip levels, Quake-safe grayscale palette). The PNGs in textures/ override these in full color at runtime. Included in the ZIP as a real binary file.";
+		div.appendChild(info);
+		const sw = document.createElement("div"); sw.className="swatches";
+		TEX_NAMES.forEach(n=>{
+			const s=document.createElement("div"); s.className="swatch";
+			s.appendChild(drawTex(n,64));
+			const lab=document.createElement("span"); lab.textContent=n; s.appendChild(lab);
+			sw.appendChild(s);
+		});
+		div.appendChild(sw);
+		wrapEl.appendChild(div);
+		$("vwFoot").textContent = "binary · generated · ships in ZIP";
+		return;
+	}
+	if(f.tex){
+		$("vwLines").textContent = "128×128";
+		const div=document.createElement("div"); div.className="imgview";
+		div.appendChild(drawTex(f.tex,128));
+		const info=document.createElement("div"); info.className="bininfo";
+		info.innerHTML = "Runtime texture override — vkQuake loads this PNG over the graybox wad texture <b style='color:var(--ember)'>"+esc(f.tex)+"</b>.<br>Generated as a real PNG at download time. Replace it with your itch.io pack's art (keep the name, power-of-two size).";
+		div.appendChild(info);
+		wrapEl.appendChild(div);
+		$("vwFoot").textContent = "image · generated · ships in ZIP";
+		return;
+	}
+	$("vwLines").textContent = lineCount(f.content) + " lines";
+	$("vwFoot").textContent = f.path + " · " + f.content.length + " chars";
+	if(state.editing){
+		const ta=document.createElement("textarea"); ta.className="codeedit"; ta.value=f.content; ta.spellcheck=false;
+		ta.id="editArea";
+		wrapEl.appendChild(ta);
+		$("vwEdit").textContent="SAVE";
+		ta.focus();
+	} else {
+		$("vwEdit").textContent="EDIT";
+		const lines=f.content.replace(/\n$/,"").split("\n");
+		const gut=document.createElement("div"); gut.className="gutter";
+		gut.innerHTML=lines.map((_,i)=>"<div>"+(i+1)+"</div>").join("");
+		const pre=document.createElement("pre"); pre.className="code";
+		pre.innerHTML=highlight(f.content,f.lang);
+		wrapEl.appendChild(gut); wrapEl.appendChild(pre);
+	}
+}
+$("vwEdit").onclick = ()=>{
+	const f=byPath(state.active); if(f.binary||f.tex) return;
+	if(!state.editing){ state.editing=true; renderViewer(); sfx.open(); return; }
+	const val=$("editArea").value;
+	f.content=val; state.editing=false;
+	renderTree(); renderViewer(); updateStats(); sfx.copy();
+	toast("Saved "+f.path+" — included in your next download");
+};
+$("vwCopy").onclick = ()=>{ const f=byPath(state.active); if(f.content!=null) copyText(f.content, f.path); };
+$("vwReset").onclick = ()=>{
+	const f=byPath(state.active); const prev=f.content;
+	f.content=f.orig; state.editing=false;
+	if(f.path==="qc/tuning.qc"){ TUNE_DEFS.forEach(d=>tune[d.key]=d.def); syncTuningUI(); }
+	renderTree(); renderViewer(); updateStats(); sfx.toggle();
+	toast("Reset "+f.path, {warn:true, undo:()=>{ f.content=prev; if(f.path==="qc/tuning.qc"){/* values stay reset; file restored */} renderTree(); renderViewer(); updateStats(); }});
+};
+$("vwDl").onclick = ()=> downloadSingle(state.active);
+$("fileSearch").addEventListener("input", e=>{ state.query=e.target.value; renderTree(); });
+
+/* ---------------- tuning panel ---------------- */
+function buildControls(){
+	const grid=$("ctlGrid"); grid.innerHTML="";
+	TUNE_DEFS.forEach(d=>{
+		const c=document.createElement("div");
+		if(d.toggle){
+			c.className="ctl toggle";
+			c.innerHTML='<label for="t_'+d.key+'">'+d.label+'</label><span class="switch"><input type="checkbox" id="t_'+d.key+'" '+(tune[d.key]?"checked":"")+'><span class="tr"></span></span>';
+			grid.appendChild(c);
+			c.querySelector("input").addEventListener("change",e=>{ tune[d.key]=e.target.checked?1:0; applyTuning(); sfx.toggle(); });
+		} else {
+			c.className="ctl";
+			c.innerHTML='<div class="ctl-top"><label for="t_'+d.key+'">'+d.label+'</label><output id="o_'+d.key+'">'+fmtNum(tune[d.key])+(d.unit?" "+d.unit:"")+'</output></div><input type="range" id="t_'+d.key+'" min="'+d.min+'" max="'+d.max+'" step="'+d.step+'" value="'+tune[d.key]+'">';
+			grid.appendChild(c);
+			const inp=c.querySelector("input");
+			const paint=()=>{ const p=(inp.value-d.min)/(d.max-d.min)*100; inp.style.setProperty("--fill",p+"%"); };
+			paint();
+			inp.addEventListener("input",e=>{
+				tune[d.key]=parseFloat(e.target.value);
+				$("o_"+d.key).textContent=fmtNum(tune[d.key])+(d.unit?" "+d.unit:"");
+				paint(); applyTuning(true);
+			});
+			inp.addEventListener("change",()=>sfx.tick());
+		}
+	});
+}
+function syncTuningUI(){
+	TUNE_DEFS.forEach(d=>{
+		const inp=$("t_"+d.key); if(!inp) return;
+		if(d.toggle){ inp.checked=!!tune[d.key]; }
+		else{
+			inp.value=tune[d.key];
+			$("o_"+d.key).textContent=fmtNum(tune[d.key])+(d.unit?" "+d.unit:"");
+			const p=(tune[d.key]-d.min)/(d.max-d.min)*100; inp.style.setProperty("--fill",p+"%");
+		}
+	});
+	applyTuning(true);
+}
+let tuneTick=0;
+function applyTuning(silent){
+	const f=byPath("qc/tuning.qc");
+	f.content=tuningSource();
+	$("tunePreview").innerHTML=highlight(f.content,"qc");
+	renderTree();
+	if(state.active==="qc/tuning.qc" && !state.editing) renderViewer();
+	updateStats();
+	if(!silent){ sfx.tick(); }
+	else if(++tuneTick%7===0){ sfx.tick(); }
+}
+$("tuneReset").onclick=()=>{ TUNE_DEFS.forEach(d=>tune[d.key]=d.def); syncTuningUI(); sfx.toggle(); toast("Tuning reset to classic Quake defaults"); };
+$("tuneRandom").onclick=()=>{
+	TUNE_DEFS.forEach(d=>{
+		if(d.toggle) return;
+		const steps=Math.round((d.max-d.min)/d.step);
+		tune[d.key]=Math.round((d.min+Math.floor(Math.random()*(steps+1))*d.step)*100)/100;
+	});
+	syncTuningUI(); sfx.dl(); toast("Randomized — chaos build. Reset when it gets silly.");
+};
+$("tuneCopy").onclick=()=>copyText(byPath("qc/tuning.qc").content,"tuning.qc");
+$("tuneDl").onclick=()=>downloadSingle("qc/tuning.qc");
+
+/* ---------------- zip (STORE method, hand-rolled, dependency-free) ---------------- */
+const CRC_TABLE=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+function crc32(d){let c=0xFFFFFFFF;for(let i=0;i<d.length;i++)c=CRC_TABLE[(c^d[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+function buildZip(entries){
+	const enc=new TextEncoder(), chunks=[], central=[];
+	let offset=0;
+	const now=new Date();
+	const dosTime=(now.getHours()<<11)|(now.getMinutes()<<5)|(now.getSeconds()>>1);
+	const dosDate=((now.getFullYear()-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate();
+	for(const e of entries){
+		const name=enc.encode(e.name), data=e.data, crc=crc32(data);
+		const lh=new DataView(new ArrayBuffer(30));
+		lh.setUint32(0,0x04034b50,true); lh.setUint16(4,20,true); lh.setUint16(6,0x0800,true);
+		lh.setUint16(8,0,true); lh.setUint16(10,dosTime,true); lh.setUint16(12,dosDate,true);
+		lh.setUint32(14,crc,true); lh.setUint32(18,data.length,true); lh.setUint32(22,data.length,true);
+		lh.setUint16(26,name.length,true); lh.setUint16(28,0,true);
+		chunks.push(new Uint8Array(lh.buffer),name,data);
+		const ch=new DataView(new ArrayBuffer(46));
+		ch.setUint32(0,0x02014b50,true); ch.setUint16(4,20,true); ch.setUint16(6,20,true);
+		ch.setUint16(8,0x0800,true); ch.setUint16(10,0,true); ch.setUint16(12,dosTime,true); ch.setUint16(14,dosDate,true);
+		ch.setUint32(16,crc,true); ch.setUint32(20,data.length,true); ch.setUint32(24,data.length,true);
+		ch.setUint16(28,name.length,true); ch.setUint32(42,offset,true);
+		central.push(new Uint8Array(ch.buffer),name);
+		offset+=30+name.length+data.length;
+	}
+	let csize=0; central.forEach(c=>csize+=c.length);
+	const eo=new DataView(new ArrayBuffer(22));
+	eo.setUint32(0,0x06054b50,true); eo.setUint16(8,entries.length,true); eo.setUint16(10,entries.length,true);
+	eo.setUint32(12,csize,true); eo.setUint32(16,offset,true);
+	return new Blob([...chunks,...central,new Uint8Array(eo.buffer)],{type:"application/zip"});
+}
+function canvasPng(canvas){
+	return new Promise(res=>{
+		if(!canvas.toBlob){ res(null); return; }
+		canvas.toBlob(b=>{ if(!b){res(null);return;} b.arrayBuffer().then(ab=>res(new Uint8Array(ab)),()=>res(null)); },"image/png");
+	});
+}
+function saveBlob(blob,name){
+	const a=document.createElement("a");
+	a.href=URL.createObjectURL(blob); a.download=name;
+	document.body.appendChild(a); a.click(); a.remove();
+	setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+async function fileBytes(f){
+	if(f.binary) return f.binary;
+	if(f.tex){ const b=await canvasPng(drawTex(f.tex,128)); return b; }
+	return new TextEncoder().encode(f.content);
+}
+let downloading=false;
+async function downloadKit(){
+	if(downloading) return; downloading=true;
+	const btns=[$("dlTop"),$("dlHero")]; btns.forEach(b=>{b.disabled=true;b.style.filter="grayscale(.4)";});
+	try{
+		const entries=[];
+		for(const f of FILES){
+			const data=await fileBytes(f);
+			if(data) entries.push({name:"slipgate/"+f.path, data});
+		}
+		const blob=buildZip(entries);
+		saveBlob(blob,"slipgate-kit.zip");
+		sfx.dl();
+		toast("Kit downloaded — "+entries.length+" files, "+(blob.size/1024).toFixed(0)+" KB. Unzip next to id1/ and run build.");
+	}catch(e){ sfx.err(); toast("Download failed: "+e.message,{warn:true}); }
+	btns.forEach(b=>{b.disabled=false;b.style.filter="";});
+	downloading=false;
+}
+async function downloadSingle(path){
+	const f=byPath(path);
+	try{
+		const data=await fileBytes(f);
+		if(!data){ toast("Nothing to download for this file",{warn:true}); return; }
+		const name=f.path.split("/").pop();
+		saveBlob(new Blob([data],{type:f.binary||f.tex?"application/octet-stream":"text/plain"}),name);
+		sfx.dl(); toast("Downloaded "+name);
+	}catch(e){ sfx.err(); toast("Download failed",{warn:true}); }
+}
+$("dlTop").onclick=downloadKit;
+$("dlHero").onclick=downloadKit;
+
+/* ---------------- setup guide ---------------- */
+const L = {
+	vk:"https://github.com/Novum/vkQuake/releases", lq:"https://github.com/lavenderdotpet/LibreQuake/releases",
+	tb:"https://github.com/TrenchBroom/TrenchBroom/releases", ew:"https://github.com/ericwa/ericw-tools/releases",
+	qcc:"https://www.fteqcc.org/", bl:"https://www.blender.org/download/", mdl:"https://github.com/robrohan/blender_ie_quake_mdl"
+};
+function stepEl(n, title, body, cmds, links){
+	const d=document.createElement("div"); d.className="step";
+	let h='<div class="stepnum">'+String(n).padStart(2,"0")+'</div><div><h3>'+title+'</h3><p>'+body+'</p>';
+	(cmds||[]).forEach(c=>{ h+='<div class="cmd"><code>'+esc(c)+'</code><button class="vbtn" data-cmd="'+esc(c)+'">COPY</button></div>'; });
+	if(links&&links.length){ h+='<div class="links">'+links.map(l=>'<a class="chip" target="_blank" rel="noopener" href="'+l[1]+'">'+l[0]+' ↗</a>').join("")+'</div>'; }
+	h+='</div>';
+	d.innerHTML=h;
+	d.querySelectorAll("[data-cmd]").forEach(b=>b.onclick=()=>copyText(b.getAttribute("data-cmd"),"command"));
+	return d;
+}
+function buildSteps(){
+	const win=[
+		["Install vkQuake","Run the Windows x64 installer. It needs the MS VC++ Redistributable (linked on the release page) and any Vulkan-capable GPU — keep your drivers updated.",[],[["vkQuake releases",L.vk]]],
+		["Add free base content (LibreQuake)","Download the LibreQuake release and put its .pak files into the id1 folder next to vkquake.exe. This supplies the player, weapons, monsters, sounds and HUD — no commercial Quake data needed.",[],[["LibreQuake releases",L.lq]]],
+		["Install the build tools","FTEQCC: download the Win64 build and drop fteqcc.exe into slipgate/tools/ (the build script finds it there). ericw-tools: unzip and add its bin folder to PATH. TrenchBroom: install normally.",[],[["FTEQCC",L.qcc],["ericw-tools",L.ew],["TrenchBroom",L.tb]]],
+		["Unzip the kit","Put the slipgate folder next to id1 so the layout is: vkquake.exe · id1/ · slipgate/. Use the big DOWNLOAD button at the top of this page.",["vkquake.exe\nid1/\nslipgate/   <- the kit"]],
+		["Build","Double-click build.bat (or run it from a terminal). It compiles progs.dat with FTEQCC, then starter.bsp with qbsp/vis/light. Green [ok] lines mean success.",["build.bat"]],
+		["Play","Double-click launch.bat. Walk north, shoot the stalkers, loot the crates, step to the door — it opens — and touch the rune wall to finish the loop.",["launch.bat","vkquake -game slipgate +map starter"]],
+		["Iterate with your LLM","Edit qc files (LLM writes them) → build.bat → launch.bat → test → git commit. In TrenchBroom: game = Quake, open maps/starter.map, add maps/slipgate.wad to the wad list. Later: Blender + the MDL plugin for itch.io models.",["git init","git add -A","git commit -m \"working state\""],[["Blender",L.bl],["MDL plugin",L.mdl]]]
+	];
+	const lin=[
+		["Install vkQuake","Download the Linux AppImage from Releases, name it vkquake.AppImage and put it next to your game data. Needs glibc 2.35+ and FUSE; most current distros are fine. Distro packages (e.g. Arch extra/vkquake) work too.",["chmod +x vkquake.AppImage"],[["vkQuake releases",L.vk]]],
+		["Add free base content (LibreQuake)","Same as Windows: LibreQuake .pak files go into id1/ next to the AppImage.",[],[["LibreQuake releases",L.lq]]],
+		["Install the build tools","FTEQCC: Linux x86_64 build → slipgate/tools/fteqcc (chmod +x) or PATH. ericw-tools: build or package, bin on PATH. TrenchBroom: AppImage or package.",["chmod +x slipgate/tools/fteqcc"],[["FTEQCC",L.qcc],["ericw-tools",L.ew],["TrenchBroom",L.tb]]],
+		["Unzip the kit","Layout: vkquake.AppImage · id1/ · slipgate/.",["unzip slipgate-kit.zip"]],
+		["Build","The script compiles QuakeC, then the map if qbsp is on PATH.",["chmod +x slipgate/build.sh slipgate/launch.sh","./slipgate/build.sh"]],
+		["Play","launch.sh finds the AppImage one folder up, or vkquake in PATH.",["./slipgate/launch.sh","vkquake -game slipgate +map starter"]],
+		["Iterate with your LLM","Same loop as Windows: edit → build → play → commit. TrenchBroom and Blender behave identically on Linux.",["git add -A && git commit -m \"working state\""],[["Blender",L.bl],["MDL plugin",L.mdl]]]
+	];
+	win.forEach((s,i)=>$("stepsWin").appendChild(stepEl(i+1,...s)));
+	lin.forEach((s,i)=>$("stepsLinux").appendChild(stepEl(i+1,...s)));
+}
+function setTab(win){
+	$("tabWin").classList.toggle("active",win); $("tabLinux").classList.toggle("active",!win);
+	$("tabWin").setAttribute("aria-selected",win); $("tabLinux").setAttribute("aria-selected",!win);
+	$("stepsWin").hidden=!win; $("stepsLinux").hidden=win;
+	sfx.toggle();
+}
+$("tabWin").onclick=()=>setTab(true);
+$("tabLinux").onclick=()=>setTab(false);
+
+/* ---------------- prompts UI ---------------- */
+function buildPrompts(){
+	const defs=[
+		{tag:"SYSTEM · paste once", title:"Project context", desc:"Goes into your LLM’s project / custom instructions. Encodes every constraint so it writes compile-ready vanilla QuakeC.", text:()=>PROMPT_SYSTEM},
+		{tag:"TASK · per feature", title:"Feature request", desc:"One feature per request, with an acceptance test. Type your feature below — it’s inserted live.", text:()=>PROMPT_TASK.replace("{{FEATURE}}", taskFeature||"[describe the feature]") , input:true},
+		{tag:"DEBUG · per error", title:"Bug report", desc:"Paste compiler or engine errors verbatim. Forces a minimal fix and a plain-language cause.", text:()=>PROMPT_DEBUG},
+		{tag:"ASSET · per pack", title:"itch.io → Quake conversion", desc:"Click-by-click Blender/MDL pipeline, naming, frames.qc updates, license logging.", text:()=>PROMPT_ASSET}
+	];
+	const grid=$("promptGrid");
+	defs.forEach(d=>{
+		const card=document.createElement("div"); card.className="pcard";
+		card.innerHTML='<div class="pc-head"><span class="pc-tag">'+d.tag+'</span><h3>'+d.title+'</h3><p>'+d.desc+'</p></div>';
+		const body=document.createElement("div"); body.className="pc-body";
+		if(d.input){
+			const fill=document.createElement("div"); fill.className="pc-fill";
+			const inp=document.createElement("input"); inp.placeholder="e.g. a grenade launcher on impulse 2"; inp.setAttribute("aria-label","Feature description");
+			fill.appendChild(inp); body.appendChild(fill);
+			inp.addEventListener("input",()=>{ taskFeature=inp.value.trim(); pre.textContent=d.text(); chars.textContent=pre.textContent.length+" chars"; });
+		}
+		const pre=document.createElement("pre"); pre.textContent=d.text(); body.appendChild(pre);
+		card.appendChild(body);
+		const foot=document.createElement("div"); foot.className="pc-foot";
+		const btn=document.createElement("button"); btn.className="btn btn-primary btn-sm"; btn.textContent="⧉ COPY PROMPT";
+		btn.onclick=()=>copyText(d.text(), d.title+" prompt");
+		const chars=document.createElement("span"); chars.className="chars"; chars.textContent=pre.textContent.length+" chars";
+		foot.appendChild(btn); foot.appendChild(chars);
+		card.appendChild(foot);
+		grid.appendChild(card);
+	});
+}
+let taskFeature="";
+
+/* ---------------- stats / boot log / ambience ---------------- */
+function updateStats(){
+	$("stFiles").textContent=FILES.length;
+	const qcLines=FILES.filter(f=>f.lang==="qc").reduce((a,f)=>a+lineCount(f.content),0);
+	$("stLines").textContent=qcLines.toLocaleString();
+	$("stBrush").textContent=WORLD_BRUSHES.length+3;
+}
+const BOOT_LINES=[
+	["p","$ fteqcc progs.src"],
+	["cm","compiling defs.qc → client.qc  (14 files)"],
+	["ok","progs.dat — 0 errors, 0 warnings"],
+	["p","$ qbsp -wadpath . starter.map"],
+	["cm","17 brushes · 20 entities · slipgate.wad: 10 textures"],
+	["ok","vis + light complete — starter.bsp ready"],
+	["p","$ vkquake -game slipgate +map starter"],
+	["hl","] slipgate online. good hunting."]
+];
+function bootLog(){
+	const el=$("bootlog");
+	const reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	if(reduced){
+		el.innerHTML=BOOT_LINES.map(l=>'<div class="'+l[0]+'">'+esc(l[1])+'</div>').join("")+'<span class="caret"></span>';
+		return;
+	}
+	let li=0, ci=0, cur=null;
+	const caret=document.createElement("span"); caret.className="caret";
+	function tick(){
+		if(li>=BOOT_LINES.length){ el.appendChild(caret); return; }
+		if(!cur){ cur=document.createElement("div"); cur.className=BOOT_LINES[li][0]; el.appendChild(cur); el.appendChild(caret); }
+		const text=BOOT_LINES[li][1];
+		ci+=2;
+		cur.textContent=text.slice(0,ci);
+		el.appendChild(caret);
+		if(ci>=text.length){ li++; ci=0; cur=null; setTimeout(tick, li===BOOT_LINES.length?0:260); }
+		else setTimeout(tick, 14);
+	}
+	tick();
+}
+function embers(){
+	const cv=$("embers"), ctx=cv.getContext("2d");
+	const reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	let W,H,DPR, parts=[], raf=null;
+	const COLORS=["255,107,26","255,179,71","255,179,71","55,224,161","176,122,255"];
+	function resize(){
+		DPR=Math.min(window.devicePixelRatio||1,1.5);
+		W=window.innerWidth; H=window.innerHeight;
+		cv.width=W*DPR; cv.height=H*DPR;
+		cv.style.width=W+"px"; cv.style.height=H+"px";
+		ctx.setTransform(DPR,0,0,DPR,0,0);
+		const n=Math.min(80,Math.max(30,Math.floor(W/16)));
+		parts=[];
+		for(let i=0;i<n;i++) parts.push(spawn(true));
+	}
+	function spawn(any){
+		return { x:Math.random()*W, y:any?Math.random()*H:H+10,
+			r:.8+Math.random()*2.2, s:.15+Math.random()*.5,
+			sway:Math.random()*2*Math.PI, sw:.3+Math.random()*.8,
+			c:COLORS[Math.floor(Math.random()*COLORS.length)],
+			a:.15+Math.random()*.45 };
+	}
+	function frame(){
+		ctx.clearRect(0,0,W,H);
+		for(let i=0;i<parts.length;i++){
+			const p=parts[i];
+			p.y-=p.s; p.sway+=0.008*p.sw; p.x+=Math.sin(p.sway)*.3;
+			if(p.y<-12){ parts[i]=spawn(false); continue; }
+			const fade=Math.min(1,p.y/(H*.25));
+			ctx.beginPath();
+			ctx.fillStyle="rgba("+p.c+","+(p.a*fade).toFixed(3)+")";
+			ctx.arc(p.x,p.y,p.r,0,7);
+			ctx.fill();
+		}
+		raf=requestAnimationFrame(frame);
+	}
+	resize();
+	window.addEventListener("resize",resize);
+	if(reduced){ ctx.clearRect(0,0,W,H); return; }
+	document.addEventListener("visibilitychange",()=>{
+		if(document.hidden){ if(raf){cancelAnimationFrame(raf);raf=null;} }
+		else if(!raf){ raf=requestAnimationFrame(frame); }
+	});
+	raf=requestAnimationFrame(frame);
+}
+
+/* ---------------- scrollspy + reveals ---------------- */
+function observers(){
+	const links=document.querySelectorAll("[data-spy]");
+	const spy=new IntersectionObserver(es=>{
+		es.forEach(e=>{
+			if(e.isIntersecting){
+				links.forEach(l=>l.classList.toggle("active",l.getAttribute("data-spy")===e.target.id));
+			}
+		});
+	},{rootMargin:"-40% 0px -55% 0px"});
+	["workbench","tuning","setup","prompts"].forEach(id=>spy.observe($(id)));
+	const rev=new IntersectionObserver(es=>{
+		es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("on"); rev.unobserve(e.target); } });
+	},{threshold:.12});
+	document.querySelectorAll(".rv").forEach(el=>rev.observe(el));
+}
+
+/* ---------------- sound toggle ---------------- */
+$("sndToggle").onclick=function(){
+	state.sound=!state.sound;
+	this.classList.toggle("off",!state.sound);
+	this.setAttribute("aria-pressed",state.sound);
+	this.querySelector("span").textContent=state.sound?"SOUND ON":"SOUND OFF";
+	if(state.sound) sfx.toggle();
+};
+
+/* ---------------- init ---------------- */
+buildControls();
+applyTuning(true);
+renderTree();
+renderViewer();
+buildSteps();
+buildPrompts();
+updateStats();
+bootLog();
+embers();
+observers();
+</script>
+</body>
+</html>

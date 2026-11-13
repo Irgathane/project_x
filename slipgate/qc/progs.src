@@ -1,0 +1,14 @@
+progs.dat
+defs.qc
+frames.qc
+tuning.qc
+subs.qc
+combat.qc
+items.qc
+weapons.qc
+player.qc
+monsters.qc
+doors.qc
+triggers.qc
+world.qc
+client.qc

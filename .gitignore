@@ -1,0 +1,36 @@
+# Engine source (nested git repo, ~180 MB) — build it separately, see README
+vkQuake/
+
+# Engine build artifacts
+vkQuake/build/
+
+# QuakeC / map build artifacts
+slipgate/progs.dat
+slipgate/qc/progs.dat
+slipgate/qc/*.lno
+slipgate/maps/*.bsp
+slipgate/maps/*.lit
+slipgate/maps/*.lit2
+slipgate/maps/*.pts
+slipgate/maps/*.lin
+slipgate/maps/*.prt
+
+# Game data (download LibreQuake / id1 separately, do not commit)
+id1/
+slipgate/id1/
+
+# Extracted asset packs (large, licence-varied — keep the archives, not the guts)
+assests/work/
+# Archives are third-party art; only the manifest (assests/README.md) is committed
+assests/*.rar
+assests/*.zip
+assests/*.7z
+
+# Blender intermediates
+slipgate/models/src/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+__pycache__/

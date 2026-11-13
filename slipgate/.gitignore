@@ -1,0 +1,9 @@
+config.cfg
+autoexec.cfg
+*.log
+stdout.txt
+stderr.txt
+qc/*.lno
+maps/*.prt
+maps/*.pts
+maps/*.texinfo.json

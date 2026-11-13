@@ -1,0 +1,8 @@
+// Slipgate Kit defaults — executed at startup instead of id1/quake.rc
+exec default.cfg
+crosshair "1"
+sensitivity "3"
+scr_conspeed "2000"
+exec config.cfg
+exec autoexec.cfg
+stuffcmds
