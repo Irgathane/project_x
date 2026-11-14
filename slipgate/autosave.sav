@@ -1,0 +1,411 @@
+5
+Slipgate_Starter______kills:__0/__2____
+100.000000
+25.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+0.000000
+1
+starter
+21.908621
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+m
+{
+"self" "8"
+"other" "0"
+"world" "0"
+"time" "21.900005"
+"frametime" "0.013889"
+"force_retouch" "0.000000"
+"mapname" "starter"
+"deathmatch" "0.000000"
+"coop" "0.000000"
+"teamplay" "0.000000"
+"serverflags" "0.000000"
+"total_secrets" "0.000000"
+"total_monsters" "2.000000"
+"found_secrets" "0.000000"
+"killed_monsters" "0.000000"
+"parm1" "100.000000"
+"parm2" "25.000000"
+"parm3" "0.000000"
+"parm4" "0.000000"
+"parm5" "0.000000"
+"parm6" "0.000000"
+"parm7" "0.000000"
+"parm8" "0.000000"
+"parm9" "0.000000"
+"parm10" "0.000000"
+"parm11" "0.000000"
+"parm12" "0.000000"
+"parm13" "0.000000"
+"parm14" "0.000000"
+"parm15" "0.000000"
+"parm16" "0.000000"
+"trace_allsolid" "0.000000"
+"trace_startsolid" "0.000000"
+"trace_fraction" "0.000000"
+"trace_plane_dist" "0.000000"
+"trace_ent" "0"
+"trace_inopen" "0.000000"
+"trace_inwater" "0.000000"
+"msg_entity" "0"
+"activator" "0"
+"skill" "1.000000"
+"intermission_running" "0.000000"
+"intermission_end" "0.000000"
+"nextmap" ""
+}
+{
+"modelindex" "1.000000"
+"movetype" "7.000000"
+"solid" "4.000000"
+"classname" "worldspawn"
+"model" "maps/starter.bsp"
+"message" "Slipgate Starter"
+"wad" "slipgate.wad"
+}
+{
+"modelindex" "5.000000"
+"absmin" "-209.000000 -145.000000 8.000000"
+"absmax" "-175.000000 -111.000000 66.000000"
+"movetype" "3.000000"
+"solid" "3.000000"
+"origin" "-192.000000 -128.000000 33.000000"
+"angles" "-3.109131 81.842651 0.000000"
+"classname" "player"
+"model" "progs/player.mdl"
+"mins" "-16.000000 -16.000000 -24.000000"
+"maxs" "16.000000 16.000000 32.000000"
+"size" "32.000000 32.000000 56.000000"
+"health" "100.000000"
+"weapon" "1.000000"
+"weaponmodel" "progs/v_shot.mdl"
+"currentammo" "25.000000"
+"ammo_shells" "25.000000"
+"items" "4353.000000"
+"takedamage" "2.000000"
+"view_ofs" "0.000000 0.000000 22.000000"
+"v_angle" "9.327393 81.842651 0.000000"
+"netname" "player"
+"flags" "8.000000"
+"colormap" "1.000000"
+"team" "1.000000"
+"max_health" "100.000000"
+"watertype" "-1.000000"
+"attack_finished" "21.700285"
+"pain_finished" "21.700285"
+"respawn_at" "21.699995"
+"air_finished" "33.894730"
+"th_die" "player_die"
+"th_pain" "player_pain"
+}
+{
+"modelindex" "2.000000"
+"absmin" "-49.000000 191.000000 -1.000000"
+"absmax" "49.000000 209.000000 129.000000"
+"movetype" "7.000000"
+"solid" "4.000000"
+"angles" "0.000000 -1.000000 0.000000"
+"classname" "func_door"
+"model" "*1"
+"mins" "-48.000000 192.000000 0.000000"
+"maxs" "48.000000 208.000000 128.000000"
+"size" "96.000000 16.000000 128.000000"
+"use" "door_use"
+"targetname" "exitdoor"
+"movedir" "1.000000 0.000000 0.000000"
+"wait" "4.000000"
+"speed" "100.000000"
+"lip" "4.000000"
+"pos2" "92.000000 0.000000 0.000000"
+}
+{
+"modelindex" "3.000000"
+"absmin" "-97.000000 127.000000 -1.000000"
+"absmax" "97.000000 193.000000 65.000000"
+"solid" "1.000000"
+"classname" "trigger_multiple"
+"model" "*2"
+"mins" "-96.000000 128.000000 0.000000"
+"maxs" "96.000000 192.000000 64.000000"
+"size" "192.000000 64.000000 64.000000"
+"touch" "multi_touch"
+"target" "exitdoor"
+"wait" "1.000000"
+}
+{
+"modelindex" "4.000000"
+"absmin" "-41.000000 287.000000 -1.000000"
+"absmax" "41.000000 321.000000 65.000000"
+"solid" "1.000000"
+"classname" "trigger_changelevel"
+"model" "*3"
+"mins" "-40.000000 288.000000 0.000000"
+"maxs" "40.000000 320.000000 64.000000"
+"size" "80.000000 32.000000 64.000000"
+"touch" "changelevel_touch"
+"map" "starter"
+}
+{
+"origin" "-192.000000 -128.000000 32.000000"
+"classname" "info_player_start"
+}
+{
+"origin" "0.000000 300.000000 56.000000"
+"angles" "0.000000 270.000000 0.000000"
+"classname" "info_intermission"
+}
+{
+"modelindex" "10.000000"
+"absmin" "-152.482574 -126.739769 -0.968750"
+"absmax" "-118.482574 -92.739769 49.031250"
+"movetype" "6.000000"
+"solid" "3.000000"
+"origin" "-135.482574 -109.739769 24.031250"
+"angles" "0.000000 197.995605 0.000000"
+"classname" "monster_stalker"
+"model" "progs/soldier.mdl"
+"frame" "7.000000"
+"mins" "-16.000000 -16.000000 -24.000000"
+"maxs" "16.000000 16.000000 24.000000"
+"size" "32.000000 32.000000 48.000000"
+"think" "stalker_melee_hit"
+"nextthink" "22.300003"
+"health" "60.000000"
+"takedamage" "2.000000"
+"view_ofs" "0.000000 0.000000 24.000000"
+"enemy" "1"
+"flags" "544.000000"
+"ideal_yaw" "198.000000"
+"yaw_speed" "40.000000"
+"anim_frame" "5.000000"
+"th_die" "stalker_die"
+"th_pain" "stalker_pain"
+}
+{
+"modelindex" "10.000000"
+"absmin" "-189.332214 -88.913307 -0.968750"
+"absmax" "-155.332214 -54.913307 49.031250"
+"movetype" "6.000000"
+"solid" "3.000000"
+"origin" "-172.332214 -71.913307 24.031250"
+"angles" "0.000000 250.999146 0.000000"
+"classname" "monster_stalker"
+"model" "progs/soldier.mdl"
+"frame" "7.000000"
+"mins" "-16.000000 -16.000000 -24.000000"
+"maxs" "16.000000 16.000000 24.000000"
+"size" "32.000000 32.000000 48.000000"
+"think" "stalker_melee_hit"
+"nextthink" "22.300005"
+"health" "60.000000"
+"takedamage" "2.000000"
+"view_ofs" "0.000000 0.000000 24.000000"
+"enemy" "1"
+"flags" "544.000000"
+"ideal_yaw" "251.000000"
+"yaw_speed" "40.000000"
+"anim_frame" "3.000000"
+"th_die" "stalker_die"
+"th_pain" "stalker_pain"
+}
+{
+"modelindex" "8.000000"
+"absmin" "-241.000000 143.000000 -0.968750"
+"absmax" "-207.000000 177.000000 57.031250"
+"solid" "1.000000"
+"origin" "-224.000000 160.000000 0.031250"
+"classname" "item_health1"
+"model" "maps/b_bh25.bsp"
+"mins" "-16.000000 -16.000000 0.000000"
+"maxs" "16.000000 16.000000 56.000000"
+"size" "32.000000 32.000000 56.000000"
+"touch" "health_touch"
+"flags" "512.000000"
+}
+{
+"modelindex" "8.000000"
+"absmin" "207.000000 -177.000000 -0.968750"
+"absmax" "241.000000 -143.000000 57.031250"
+"solid" "1.000000"
+"origin" "224.000000 -160.000000 0.031250"
+"classname" "item_health1"
+"model" "maps/b_bh25.bsp"
+"mins" "-16.000000 -16.000000 0.000000"
+"maxs" "16.000000 16.000000 56.000000"
+"size" "32.000000 32.000000 56.000000"
+"touch" "health_touch"
+"flags" "512.000000"
+}
+{
+"modelindex" "9.000000"
+"absmin" "207.000000 143.000000 -0.968750"
+"absmax" "241.000000 177.000000 57.031250"
+"solid" "1.000000"
+"origin" "224.000000 160.000000 0.031250"
+"classname" "item_shells"
+"model" "maps/b_shell0.bsp"
+"mins" "-16.000000 -16.000000 0.000000"
+"maxs" "16.000000 16.000000 56.000000"
+"size" "32.000000 32.000000 56.000000"
+"touch" "ammo_touch"
+"flags" "512.000000"
+}
+{
+"modelindex" "9.000000"
+"absmin" "-17.000000 -177.000000 -0.968750"
+"absmax" "17.000000 -143.000000 57.031250"
+"solid" "1.000000"
+"origin" "0.000000 -160.000000 0.031250"
+"classname" "item_shells"
+"model" "maps/b_shell0.bsp"
+"mins" "-16.000000 -16.000000 0.000000"
+"maxs" "16.000000 16.000000 56.000000"
+"size" "32.000000 32.000000 56.000000"
+"touch" "ammo_touch"
+"flags" "512.000000"
+}
+{
+"modelindex" "7.000000"
+"absmin" "-17.000000 -17.000000 -0.968750"
+"absmax" "17.000000 17.000000 57.031250"
+"solid" "1.000000"
+"origin" "0.000000 0.000000 0.031250"
+"classname" "weapon_shotgun"
+"model" "progs/g_shot.mdl"
+"mins" "-16.000000 -16.000000 0.000000"
+"maxs" "16.000000 16.000000 56.000000"
+"size" "32.000000 32.000000 56.000000"
+"touch" "weapon_touch"
+"flags" "512.000000"
+}
+{
+}
+/*
+// QuakeSpasm extended savegame
+sv.model_precache 1 "maps/starter.bsp"
+sv.model_precache 2 "*1"
+sv.model_precache 3 "*2"
+sv.model_precache 4 "*3"
+sv.model_precache 5 "progs/player.mdl"
+sv.model_precache 6 "progs/v_shot.mdl"
+sv.model_precache 7 "progs/g_shot.mdl"
+sv.model_precache 8 "maps/b_bh25.bsp"
+sv.model_precache 9 "maps/b_shell0.bsp"
+sv.model_precache 10 "progs/soldier.mdl"
+sv.sound_precache 1 "weapons/shotgn2.wav"
+sv.sound_precache 2 "weapons/dryfire.wav"
+sv.sound_precache 3 "weapons/pkup.wav"
+sv.sound_precache 4 "items/health1.wav"
+sv.sound_precache 5 "player/plyrjmp8.wav"
+sv.sound_precache 6 "player/pain1.wav"
+sv.sound_precache 7 "player/death1.wav"
+sv.sound_precache 8 "doors/airdoor1.wav"
+sv.sound_precache 9 "doors/airdoor2.wav"
+sv.sound_precache 10 "soldier/idle.wav"
+sv.sound_precache 11 "soldier/sight1.wav"
+sv.sound_precache 12 "soldier/sattck1.wav"
+sv.sound_precache 13 "soldier/pain1.wav"
+sv.sound_precache 14 "soldier/death1.wav"
+sv.serverflags 0
+spawnparm 17 "1.000000"
+spawnparm 22 "1.000000"
+spawnparm 24 "-1.000000"
+spawnparm 40 "0.000000"
+spawnparm 41 "0.000000"
+spawnparm 42 "0.000000"
+spawnparm 43 "0.000000"
+spawnparm 44 "0.000000"
+spawnparm 45 "0.000000"
+spawnparm 46 "0.000000"
+spawnparm 47 "0.000000"
+spawnparm 48 "0.000000"
+spawnparm 49 "0.000000"
+spawnparm 51 "1.000000"
+spawnparm 56 "0.000000"
+spawnparm 57 "0.000000"
+spawnparm 58 "0.000000"
+spawnparm 59 "0.000000"
+spawnparm 60 "0.000000"
+spawnparm 61 "0.000000"
+spawnparm 62 "0.000000"
+spawnparm 63 "0.000000"
+spawnparm 64 "0.000000"
+fog 0 0.3 0.3 0.3
+sky ""
+skyfog 0.5
+*/

@@ -34,3 +34,9 @@ slipgate/models/src/
 Thumbs.db
 *.swp
 __pycache__/
+
+# map fixer backups
+*.map.orig
+
+# compiler log
+fteqcc.log

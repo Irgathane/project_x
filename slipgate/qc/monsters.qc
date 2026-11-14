@@ -7,6 +7,7 @@
 // ============================================================
 
 void() stalker_walk;   // forward declaration
+void() stalker_stand;  // forward declaration
 
 void() stalker_melee_hit = {
 	self.think = stalker_walk;

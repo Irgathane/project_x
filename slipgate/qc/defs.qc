@@ -4,64 +4,78 @@
 // ============================================================
 
 // ---- globals the engine writes ----
+// ORDER AND TYPES ARE THE ABI. Must match globalvars_t in the engine's
+// progdefs.q1 exactly; any insertion/reorder makes the engine reject progs.dat
+// with "system vars have been modified, progdefs.h is out of date".
 entity self, other, world;
 float  time, frametime, force_retouch;
-string mapname, startspot;
+string mapname;
 float  deathmatch, coop, teamplay, serverflags;
 float  total_secrets, total_monsters, found_secrets, killed_monsters;
 float  parm1, parm2, parm3, parm4, parm5, parm6, parm7, parm8;
 float  parm9, parm10, parm11, parm12, parm13, parm14, parm15, parm16;
 vector v_forward, v_up, v_right;
-float  trace_allsolid, trace_startsolid, trace_fraction, trace_inopen, trace_inwater;
-entity trace_ent;
+float  trace_allsolid, trace_startsolid, trace_fraction;
 vector trace_endpos, trace_plane_normal;
 float  trace_plane_dist;
+entity trace_ent;
+float  trace_inopen, trace_inwater;
 entity msg_entity;
-float  skill;
+void() main, StartFrame, PlayerPreThink, PlayerPostThink;
+void() ClientKill, ClientConnect, PutClientInServer, ClientDisconnect;
+void() SetNewParms, SetChangeParms;
 
-// ---- kit globals ----
+// ---- kit globals: appended AFTER the vanilla 54, so layout stays valid ----
 entity activator;
+float  skill;
 float  intermission_running, intermission_end;
 string nextmap;
 
 // ---- entity fields the engine reads/writes ----
-.float modelindex;
+// Same rule: this is entvars_t order. .blocked and .dmg_inflictor are part of it.
+.float  modelindex;
 .vector absmin, absmax;
-.float ltime;
-.float movetype, solid;
+.float  ltime;
+.float  movetype, solid;
 .vector origin, oldorigin, velocity, angles, avelocity, punchangle;
 .string classname, model;
-.float frame, skin, effects;
+.float  frame, skin, effects;
 .vector mins, maxs, size;
-.void() touch, use, think;
-.float nextthink;
+.void() touch, use, think, blocked;
+.float  nextthink;
 .entity groundentity;
-.float health, frags, weapon;
+.float  health, frags, weapon;
 .string weaponmodel;
-.float weaponframe, currentammo;
-.float ammo_shells, ammo_nails, ammo_rockets, ammo_cells;
-.float items;
-.float takedamage;
+.float  weaponframe, currentammo;
+.float  ammo_shells, ammo_nails, ammo_rockets, ammo_cells;
+.float  items;
+.float  takedamage;
 .entity chain;
-.float deadflag;
+.float  deadflag;
 .vector view_ofs;
-.float button0, button1, button2, impulse;
-.float fixangle;
+.float  button0, button1, button2, impulse;
+.float  fixangle;
 .vector v_angle;
-.float idealpitch, flags, colormap, team, max_health, teleport_time;
-.float armortype, armorvalue, waterlevel, watertype, ideal_yaw, yaw_speed;
-.entity goalentity, enemy, owner, dmg_inflictor, aiment;
-.float spawnflags;
-.string target, targetname, netname;
+.float  idealpitch;
+.string netname;
+.entity enemy;
+.float  flags, colormap, team, max_health, teleport_time;
+.float  armortype, armorvalue, waterlevel, watertype, ideal_yaw, yaw_speed;
+.entity aiment, goalentity;
+.float  spawnflags;
+.string target, targetname;
+.float  dmg_take, dmg_save;
+.entity dmg_inflictor, owner;
 .vector movedir;
-.string message, noise, noise1, noise2, noise3;
-.float dmg_take, dmg_save;
+.string message;
+.float  sounds;
+.string noise, noise1, noise2, noise3;
 
-// ---- map keys + kit fields ----
-.float cnt, wait, delay, speed, lip, angle, light, sounds, style, dmg;
+// ---- kit fields: appended after the vanilla 77 ----
+.float  cnt, wait, delay, speed, lip, angle, light, style, dmg;
 .string wad, killtarget, map, mdl;
-.float state, attack_finished, pain_finished, respawn_at;
-.float weaponanim_next, anim_next, anim_frame, air_finished;
+.float  state, attack_finished, pain_finished, respawn_at;
+.float  weaponanim_next, anim_next, anim_frame, air_finished;
 .vector pos1, pos2, finaldest;
 .void() think1, th_stand, th_walk, th_melee, th_die;
 .void(entity, float) th_pain;

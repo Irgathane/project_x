@@ -11,7 +11,12 @@ Run everything from the repo root.
 | `extract_packs.py` | unpack the RAR/ZIP packs in `assests/` → `assests/work/` | `libarchive-tools` (bsdtar) |
 | `texture_import.py` | validate + install a PNG texture as a vkQuake override | `python3-pil` |
 | `make_wad.py` | *optional* rebuild `slipgate.wad` from the PNGs | `python3-pil` + `id1/gfx/palette.lmp` |
+| `fix_map_winding.py` | repair inside-out brushes in a `.map` (WARNING 09) | none |
 | `blender_asset.py` | *optional* headless Blender: model pack → `.obj`/`.mtl` | Blender 4.x |
+| `check_abi.py` | verify `defs.qc` still matches the engine's 54/77 layout | — |
+| `fix_progs_crc.py` | stamp `progs.dat` with the vanilla ABI crc (5927) | — |
+| `export_bundle.sh` | pack everything for a USB stick (`--no-engine` for a smaller one) | — |
+| `setup-machine.sh` | provision a fresh machine from that bundle | apt |
 
 ---
 
@@ -56,7 +61,25 @@ Rules the scripts enforce (and why):
 Our existing overrides are `128x128`; the packs are `256x256`. Both are valid —
 `--resize 128` if you want to match the current look exactly.
 
-## 2. WAD rebuild (rarely needed)
+## 2. Map brushes come out inside-out
+
+Symptom: `qbsp` prints `WARNING 09: Couldn't create brush faces` once per brush,
+reports `0 brushes / 0 planes`, and writes no `.bsp`.
+
+Cause: a Quake face's three points must be wound so the plane normal points *out*
+of the solid. Some editors/generators emit the conventional counter-clockwise
+order, which ericw-tools reads as inward-facing, so every face is discarded.
+
+```sh
+python3 tools/fix_map_winding.py slipgate/maps/starter.map   # swaps 2nd/3rd point per face, backs up .orig
+qbsp -wadpath . slipgate/maps/starter.map                    # warnings must be gone
+```
+
+`starter.map` was fixed this way (102 faces); `starter.map.orig` keeps the
+broken original for comparison. Fix the generator or re-run this tool after
+every export.
+
+## 3. WAD rebuild (rarely needed)
 
 Only when the map must reference a texture name that does not exist in the WAD.
 Needs the Quake palette from the game data, which is **not** in this repo:
@@ -73,7 +96,7 @@ requires `qbsp`/`vis`/`light` to recompile the `.bsp` afterwards.
 Tested behaviour: rebuilding the current WAD reproduces all 7 texture lumps
 (now at the PNG resolution) and copies `trigger`/`clip`/`skip` byte-identically.
 
-## 3. Models (Blender, headless)
+## 4. Models (Blender, headless)
 
 ```sh
 blender --background --python tools/blender_asset.py -- --selftest
@@ -96,3 +119,32 @@ Frame indices for any animation still go into `qc/frames.qc` as numbers.
 
 Every pack needs a row in `slipgate/CREDITS.md` at download time — use the
 `--credits` flag to print a correctly shaped row, then paste it into the table.
+
+## 5. Moving the project to another machine
+
+Code lives in git; the big third-party data (`id1/` 242 MB, art packs 246 MB) does not.
+A USB bundle carries both and the installer rebuilds the machine-specific parts
+(the engine and every artifact).
+
+```sh
+# on the old machine, with the stick mounted at /media/$USER/STICK
+./tools/export_bundle.sh /media/$USER/STICK
+sha256sum -c /media/$USER/STICK/SHA256SUMS.txt   # optional integrity check
+
+# on the new machine
+cd /media/$USER/STICK && ./setup-machine.sh --bundle "$PWD"
+```
+
+`setup-machine.sh` installs packages (gcc/meson/ninja/SDL3/Vulkan/fteqcc/ericw-tools),
+installs the **LunarG Vulkan SDK**, unpacks code + data, then builds vkQuake,
+`progs.dat` (with the crc stamp and an ABI check) and `starter.bsp`, and finally
+runs a Vulkan sanity check. It works on sysvinit (antiX) — nothing assumes systemd.
+
+Two gotchas baked into it, both found the hard way:
+
+- **Never `eval`/`source` the SDK's `setup-env.sh` from a script.** It derives
+  `VULKAN_SDK` from `BASH_SOURCE`, which resolves to the caller, so every path
+  silently points at the wrong directory and meson falls back to the distro's
+  too-old Vulkan loader. The installer exports the paths explicitly instead.
+- **The engine is not packed.** It is machine-specific (GPU driver, shader
+  compiler) and its build tree is ~1 GB. Rebuilding takes ~5 minutes.

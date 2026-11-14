@@ -24,4 +24,7 @@ void() worldspawn = {
 void() info_player_start = { self.angles_y = self.angle; };
 void() info_intermission = {};
 void() info_null = { remove(self); };   // spotlight aim target
-void() light = { remove(self); };       // baked by the light tool
+// NB: classname "light" stubs are baked by the light tool, so no spawn function is
+// needed. The name `light` itself is taken by the .float field in defs.qc (line 61),
+// hence light_baked.
+void() light_baked = { remove(self); };

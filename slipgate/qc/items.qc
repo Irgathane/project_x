@@ -43,9 +43,8 @@ void() weapon_touch = {
 	self.nextthink = time + 25;
 };
 
-void(string mdl) PlaceItem = {
-	self.mdl = mdl;
-	setmodel(self, mdl);
+void(string itemmodel) PlaceItem = {
+	setmodel(self, itemmodel);
 	setsize(self, '-16 -16 0', '16 16 56');
 	self.solid = SOLID_TRIGGER;
 	self.movetype = MOVETYPE_NONE;

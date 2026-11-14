@@ -24,7 +24,7 @@ type Params = Static<typeof params>;
 
 // LunarG Vulkan SDK env: Debian's vulkan loader/spirv-tools are too old for vkQuake.
 const SDK = `${process.env.HOME}/VulkanSDK/1.4.363.1`;
-const SDK_ENV = `export PATH="${SDK}/x86_64/bin:$PATH"; export PKG_CONFIG_PATH="${SDK}/x86_64/lib/pkgconfig"; export LD_LIBRARY_PATH="${SDK}/x86_64/lib:\${LD_LIBRARY_PATH:-}"; export VULKAN_SDK="${SDK}"`;
+const SDK_ENV = `export VULKAN_SDK="${SDK}/x86_64"; export PATH="${SDK}/x86_64/bin:$PATH"; export PKG_CONFIG_PATH="${SDK}/x86_64/lib/VulkanLoader/lib/pkgconfig:${SDK}/x86_64/share/pkgconfig:${SDK}/x86_64/lib/pkgconfig:${PKG_CONFIG_PATH:-}"; export LD_LIBRARY_PATH="${SDK}/x86_64/lib/VulkanLoader/lib:${SDK}/x86_64/lib:${LD_LIBRARY_PATH:-}"`;
 
 const MAX_OUTPUT = 4000; // chars of command output returned to the model
 
@@ -61,14 +61,17 @@ export default function buildQuake(pi: ExtensionAPI) {
 				return code === 0;
 			};
 
-			// --- progs: fteqcc ---
+			// --- progs: fteqcc (+ ABI crc stamp, required by vkQuake) ---
 			const buildProgs = async () => {
 				const qc = `${root}/slipgate/qc`;
 				const qcc = existsSync(`${root}/slipgate/tools/fteqcc`) ? `${root}/slipgate/tools/fteqcc` : "fteqcc";
 				const r = await sh(`command -v "${qcc}" >/dev/null || { echo "ERROR: fteqcc not found in PATH or slipgate/tools/"; exit 127; }; "${qcc}" progs.src`, qc, signal);
 				if (r.code === 0) {
+					// fteqcc's computed crc never equals PROGHEADER_CRC once a mod adds
+					// fields, so stamp the vanilla marker or vkQuake refuses to load it.
+					const stamp = await sh(`python3 "${root}/tools/fix_progs_crc.py" "${qc}/progs.dat"`, root, signal);
 					await sh(`cp "${qc}/progs.dat" "${root}/slipgate/progs.dat"`, root, signal);
-					record("progs", 0, `${r.stdout}${r.stderr}\nprogs.dat copied to slipgate/`);
+					record("progs", 0, `${r.stdout}${r.stderr}\n${stamp.stdout}\nprogs.dat copied to slipgate/`);
 				} else {
 					record("progs", r.code, `${r.stdout}\n${r.stderr}`);
 				}
@@ -100,10 +103,10 @@ export default function buildQuake(pi: ExtensionAPI) {
 				record("engine", r.code, `${r.stdout}\n${r.stderr}`);
 			};
 
-			// --- launch: locally built vkquake ---
+			// --- launch: locally built vkquake, basedir = repo root (./id1 + ./slipgate) ---
 			const launch = async () => {
 				const r = await sh(
-					`${SDK_ENV} && cd "${root}/slipgate" && exec "${root}/vkQuake/build/vkquake" -game . +map "${map}"`,
+					`${SDK_ENV} && cd "${root}" && exec "${root}/vkQuake/build/vkquake" -game slipgate +map "${map}"`,
 					root,
 					signal,
 				);
