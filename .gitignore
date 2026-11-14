@@ -43,6 +43,3 @@ __pycache__/
 
 # compiler log
 fteqcc.log
-
-# runtime console log
-qconsole.log
