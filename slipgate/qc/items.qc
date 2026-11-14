@@ -8,7 +8,7 @@ void() health_touch = {
 	if (other.health >= TUNE_MAX_HEALTH) return;
 	other.health = other.health + TUNE_HEALTH_AMT;
 	if (other.health > TUNE_MAX_HEALTH) other.health = TUNE_MAX_HEALTH;
-	sprint(other, PRINT_LOW, "Picked up health\n");
+	sprint(other, "Picked up health\n");
 	sound(other, CHAN_ITEM, "items/health1.wav", 1, ATTN_NORM);
 	self.solid = SOLID_NOT;
 	self.model = "";
@@ -21,7 +21,7 @@ void() ammo_touch = {
 	if (other.classname != "player") return;
 	if (other.ammo_shells >= 200) return;
 	other.ammo_shells = other.ammo_shells + 10;
-	sprint(other, PRINT_LOW, "Picked up 10 shells\n");
+	sprint(other, "Picked up 10 shells\n");
 	sound(other, CHAN_ITEM, "weapons/pkup.wav", 1, ATTN_NORM);
 	self.solid = SOLID_NOT;
 	self.model = "";
@@ -34,7 +34,7 @@ void() weapon_touch = {
 	if (other.classname != "player") return;
 	other.items = other.items | IT_SHOTGUN;
 	other.ammo_shells = other.ammo_shells + 10;
-	sprint(other, PRINT_LOW, "Shells +10\n");
+	sprint(other, "Shells +10\n");
 	sound(other, CHAN_ITEM, "weapons/pkup.wav", 1, ATTN_NORM);
 	self.solid = SOLID_NOT;
 	self.model = "";

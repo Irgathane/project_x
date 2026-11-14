@@ -44,6 +44,13 @@ Non-obvious rules:
 - This machine has **no hardware Vulkan** (Radeon RV710, GL 3.0 via Mesa). The
   `vkQuake` build only runs on llvmpipe — slow. A QuakeSpasm OpenGL build lives in
   `quakespasm/` as the playable fallback.
+- **Builtin declarations must match the engine's parameter layout, not what seems
+  tidy.** `sprint` and `centerprint` are both `(entity, string, ...)`: the engine
+  reads the format string from *parm1*. Adding a `float level` argument (or omitting
+  the entity) makes the engine read the wrong parm as a string offset — that is how
+  `Host_Error: PR_GetString: invalid string offset 1073741824` happens, since
+  1073741824 is exactly the bit pattern of `2.0`. Purely a QC-side bug; the ABI and
+  CRC stamp are not involved.
 
 ## How to answer
 

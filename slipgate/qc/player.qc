@@ -34,7 +34,7 @@ void() player_die = {
 	self.respawn_at = time + TUNE_RESPAWN_TIME;
 	sound(self, CHAN_VOICE, "player/death1.wav", 1, ATTN_NORM);
 	particle(self.origin + '0 0 24', '0 0 40', 73, 20);
-	sprint(self, PRINT_HIGH, "You died. Respawning in ", ftos(TUNE_RESPAWN_TIME), " seconds...\n");
+	sprint(self, "You died. Respawning in ", ftos(TUNE_RESPAWN_TIME), " seconds...\n");
 };
 
 void(entity attacker, float damage) player_pain = {

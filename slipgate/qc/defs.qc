@@ -93,7 +93,6 @@ float CHAN_AUTO = 0, CHAN_WEAPON = 1, CHAN_VOICE = 2, CHAN_ITEM = 3, CHAN_BODY =
 float ATTN_NONE = 0, ATTN_NORM = 1, ATTN_IDLE = 2, ATTN_STATIC = 3;
 float CONTENT_EMPTY = -1, CONTENT_SOLID = -2, CONTENT_WATER = -3;
 float CONTENT_SLIME = -4, CONTENT_LAVA = -5, CONTENT_SKY = -6;
-float PRINT_LOW = 0, PRINT_MEDIUM = 1, PRINT_HIGH = 2;
 float IT_SHOTGUN = 1, IT_SHELLS = 256, IT_AXE = 4096;
 
 // ---- builtins (vanilla Quake / vkQuake safe) ----
@@ -114,7 +113,7 @@ entity(entity start, .string fld, string match) find = #18;
 string(string s) precache_sound = #19;
 string(string s) precache_model = #20;
 void(string s, ...) bprint = #23;
-void(entity client, float level, string s, ...) sprint = #24;
+void(entity client, string s, ...) sprint = #24;
 void(string s, ...) dprint = #25;
 string(float f) ftos = #26;
 string(vector v) vtos = #27;
@@ -126,4 +125,4 @@ float(string s) cvar = #45;
 void(vector o, vector d, float color, float count) particle = #48;
 void() ChangeYaw = #49;
 void(string s) changelevel = #70;
-void(string s, ...) centerprint = #73;
+void(entity client, string s, ...) centerprint = #73;

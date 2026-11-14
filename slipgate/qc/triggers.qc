@@ -43,7 +43,7 @@ void() changelevel_touch = {
 	intermission_end = time + 5;
 	nextmap = self.map;
 	if (!nextmap) nextmap = mapname;
-	centerprint("SLIPGATE REACHED\n\nMonsters: ", ftos(killed_monsters),
+	centerprint(other, "SLIPGATE REACHED\n\nMonsters: ", ftos(killed_monsters),
 		" / ", ftos(total_monsters), "\n\nHold on...");
 	bprint(other.netname, " reached the exit\n");
 };

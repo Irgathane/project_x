@@ -63,7 +63,7 @@ void() RespawnPlayer = {
 	PutClientInServer();
 	self.ammo_shells = shells;
 	if (self.ammo_shells < 10) self.ammo_shells = 10;
-	sprint(self, PRINT_HIGH, "Back in the fight.\n");
+	sprint(self, "Back in the fight.\n");
 };
 
 void() ClientConnect = { bprint(self.netname, " entered the slipgate\n"); };
