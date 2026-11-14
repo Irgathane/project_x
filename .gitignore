@@ -1,6 +1,9 @@
 # Engine source (nested git repo, ~180 MB) — build it separately, see README
 vkQuake/
 
+# OpenGL fallback engine (mirror of sezero/quakespasm) — clone and build separately
+quakespasm/
+
 # Engine build artifacts
 vkQuake/build/
 
@@ -40,3 +43,6 @@ __pycache__/
 
 # compiler log
 fteqcc.log
+
+# runtime console log
+qconsole.log
