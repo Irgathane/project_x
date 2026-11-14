@@ -59,6 +59,15 @@ if (( WITH_ENGINE )); then
     echo "  vkQuake-src.tar.gz    $(size "$OUT/vkQuake-src.tar.gz")"
 fi
 
+# User-level pi config (context-management policy). The GitHub PAT is deliberately
+# NOT packed: it is a secret, copy it by hand from ~/.pi/agent/.github_pat.
+if [[ -f "$HOME/.pi/agent/instructions.md" ]]; then
+    say "packing pi agent config"
+    cp "$HOME/.pi/agent/instructions.md" "$OUT/agent-instructions.md"
+    echo "  agent-instructions.md (copy to ~/.pi/agent/instructions.md)"
+    echo "  NOT packed: .github_pat — copy it yourself, mode 600"
+fi
+
 say "packing installer"
 cp "$ROOT/tools/setup-machine.sh" "$OUT/setup-machine.sh"
 chmod +x "$OUT/setup-machine.sh"
@@ -104,7 +113,7 @@ TXT
 say "checksums"
 ( cd "$OUT"
   shopt -s nullglob
-  files=( *.tar.gz setup-machine.sh README-MIGRATION.txt )
+  files=( *.tar.gz setup-machine.sh README-MIGRATION.txt agent-instructions.md )
   sha256sum "${files[@]}" > SHA256SUMS.txt
 )
 cat "$OUT/SHA256SUMS.txt"
