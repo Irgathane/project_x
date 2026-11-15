@@ -1,0 +1,359 @@
+diff --git a/Quake/Makefile b/Quake/Makefile
+index 28f432c..e2db5e3 100644
+--- a/Quake/Makefile
++++ b/Quake/Makefile
+@@ -230,6 +230,7 @@ OBJS = strlcat.o \
+ 	chase.o \
+ 	cl_demo.o \
+ 	cl_input.o \
++	test_input.o \
+ 	cl_main.o \
+ 	cl_parse.o \
+ 	cl_tent.o \
+diff --git a/Quake/cl_input.c b/Quake/cl_input.c
+index 6e5fcdb..43d15e6 100644
+--- a/Quake/cl_input.c
++++ b/Quake/cl_input.c
+@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ // rights reserved.
+ 
+ #include "quakedef.h"
++#include "test_input.h"
+ 
+ extern cvar_t cl_maxpitch; //johnfitz -- variable pitch clamping
+ extern cvar_t cl_minpitch; //johnfitz -- variable pitch clamping
+@@ -329,6 +330,24 @@ void CL_BaseMove (usercmd_t *cmd)
+ 		cmd->sidemove *= cl_movespeedkey.value;
+ 		cmd->upmove *= cl_movespeedkey.value;
+ 	}
++
++//
++// automated tests: replace keyboard input with a scripted command
++//
++	if (TestInput_Active ())
++	{
++		int testbuttons;
++
++		TestInput_OverrideMove (cmd);
++		cmd->viewangles[PITCH] = cl.viewangles[PITCH];
++		cmd->viewangles[YAW] = cl.viewangles[YAW];
++		cmd->viewangles[ROLL] = cl.viewangles[ROLL];
++
++		testbuttons = TestInput_Buttons ();
++		in_attack.state = (testbuttons & 1) ? 3 : 4;
++		in_jump.state = (testbuttons & 2) ? 3 : 4;
++		in_impulse = TestInput_Impulse ();
++	}
+ }
+ 
+ 
+diff --git a/Quake/cl_main.c b/Quake/cl_main.c
+index 82b327b..a627852 100644
+--- a/Quake/cl_main.c
++++ b/Quake/cl_main.c
+@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ // cl_main.c  -- client main loop
+ 
+ #include "quakedef.h"
++#include "test_input.h"
+ #include "bgmusic.h"
+ 
+ // we need to declare some mouse variables here, because the menu system
+@@ -702,6 +703,10 @@ void CL_SendCmd (void)
+ 	// get basic movement from keyboard
+ 		CL_BaseMove (&cmd);
+ 
++	// automated tests: trace player state and (inside CL_BaseMove) apply
++	// scripted input instead of keyboard input
++		TestInput_TraceFrame ();
++
+ 	// allow mice or other external controllers to add to the move
+ 		IN_Move (&cmd);
+ 
+diff --git a/Quake/host.c b/Quake/host.c
+index 871c244..9314237 100644
+--- a/Quake/host.c
++++ b/Quake/host.c
+@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ // host.c -- coordinates spawning and killing of local servers
+ 
+ #include "quakedef.h"
++#include "test_input.h"
+ #include "bgmusic.h"
+ #include <setjmp.h>
+ 
+@@ -294,6 +295,9 @@ void Host_InitLocal (void)
+ 	Cvar_RegisterVariable (&temp1);
+ 
+ 	Host_FindMaxClients ();
++
++	// automated test harness (tests/README.md)
++	TestInput_Init ();
+ }
+ 
+ 
+diff --git a/Quake/test_input.c b/Quake/test_input.c
+new file mode 100644
+index 0000000..eee31a4
+--- /dev/null
++++ b/Quake/test_input.c
+@@ -0,0 +1,225 @@
++/*
++test_input.c -- scripted input + state tracing for automated tests
++
++Not part of upstream QuakeSpasm. See tests/README.md.
++
++Input is injected in CL_BaseMove(), which is the single place the client turns
++keyboard state into a usercmd, and state is traced from CL_SendCmd(). Combined
++with "host_framerate" (fixed timestep) this makes a listen-server session
++reproducible enough to assert on: positions, velocities, viewangles, ammo,
++health. The server is never modified, so what the tests exercise is the real
++movement/physics/QuakeC path.
++*/
++
++#include "quakedef.h"
++#include "test_input.h"
++
++cvar_t	test_input = {"test_input", "", CVAR_NONE};
++cvar_t	test_trace = {"test_trace", "", CVAR_NONE};
++cvar_t	test_quit_eof = {"test_quit_eof", "0", CVAR_NONE};
++
++static FILE	*script_file;
++static FILE	*trace_file;
++static int	 script_line;
++static int	 trace_frame;
++static int	 scripted_buttons;
++static int	 scripted_impulse;
++static qboolean	 script_done;
++
++#ifndef SERVERONLY
++extern	server_t	sv;
++extern	edict_t		*sv_player;
++#endif
++
++
++void TestInput_Init (void)
++{
++	int	p;
++
++	Cvar_RegisterVariable (&test_input);
++	Cvar_RegisterVariable (&test_trace);
++	Cvar_RegisterVariable (&test_quit_eof);
++
++	/* QuakeSpasm 0.85 has no "set" command, so the harness is driven by
++	   dedicated command-line parameters instead of +set. */
++	p = COM_CheckParm ("-test_input");
++	if (p && p + 1 < com_argc)
++		Cvar_Set ("test_input", com_argv[p + 1]);
++
++	p = COM_CheckParm ("-test_trace");
++	if (p && p + 1 < com_argc)
++		Cvar_Set ("test_trace", com_argv[p + 1]);
++
++	if (COM_CheckParm ("-test_quit_eof"))
++		Cvar_SetValue ("test_quit_eof", 1);
++
++	/* fixed timestep: one script line is one frame */
++	p = COM_CheckParm ("-test_fps");
++	if (p && p + 1 < com_argc)
++	{
++		float fps = Q_atof (com_argv[p + 1]);
++
++		if (fps > 0)
++			Cvar_SetValue ("host_framerate", 1.0 / fps);
++	}
++}
++
++
++qboolean TestInput_Active (void)
++{
++	return test_input.string[0] != '\0' && !script_done;
++}
++
++
++int TestInput_Buttons (void)
++{
++	return scripted_buttons;
++}
++
++
++int TestInput_Impulse (void)
++{
++	return scripted_impulse;
++}
++
++
++static FILE *TestInput_ScriptFile (void)
++{
++	if (!script_file)
++	{
++		script_file = fopen (test_input.string, "r");
++		if (!script_file)
++		{
++			Con_Printf ("TEST: cannot open input script \"%s\"\n", test_input.string);
++			Cvar_Set ("test_input", "");
++		}
++	}
++
++	return script_file;
++}
++
++
++/*
++====================
++TestInput_OverrideMove
++
++Replaces the keyboard-derived usercmd with the next scripted line.
++====================
++*/
++void TestInput_OverrideMove (usercmd_t *cmd)
++{
++	char	line[256];
++	float	yaw, pitch, roll, forwardmove, sidemove, upmove;
++	int	buttons, impulse, parsed;
++	FILE	*f;
++
++	if (!TestInput_Active ())
++		return;
++
++	f = TestInput_ScriptFile ();
++	if (!f)
++		return;
++
++	while (fgets (line, sizeof(line), f))
++	{
++		script_line++;
++
++		if (line[0] == '#' || line[0] == '\n' || line[0] == '\r' || line[0] == '\0')
++			continue;
++
++		buttons = 0;
++		impulse = 0;
++		parsed = sscanf (line, "%f %f %f %f %f %f %d %d",
++			&yaw, &pitch, &roll, &forwardmove, &sidemove, &upmove, &buttons, &impulse);
++
++		if (parsed < 6)
++		{
++			Con_Printf ("TEST: %s:%d: expected at least 6 numbers, got %d\n",
++				test_input.string, script_line, parsed);
++			continue;
++		}
++
++		cl.viewangles[PITCH] = pitch;
++		cl.viewangles[YAW] = yaw;
++		cl.viewangles[ROLL] = roll;
++
++		cmd->forwardmove = forwardmove;
++		cmd->sidemove = sidemove;
++		cmd->upmove = upmove;
++
++		/* usercmd_t carries movement only; buttons and impulse live in
++		   cl_input.c and are picked up from here by the caller */
++		scripted_buttons = buttons;
++		scripted_impulse = impulse;
++		return;
++	}
++
++	/* end of script */
++	Con_Printf ("TEST: input script \"%s\" finished after %d frames\n",
++		test_input.string, script_line);
++	script_done = true;
++	fclose (script_file);
++	script_file = NULL;
++
++	if (test_quit_eof.value)
++		Cbuf_AddText ("quit\n");
++}
++
++
++/*
++====================
++TestInput_TraceFrame
++
++Appends one CSV row of the local player's state. Silent when test_trace is unset.
++====================
++*/
++void TestInput_TraceFrame (void)
++{
++#ifndef SERVERONLY
++	edict_t	*pl;
++
++	if (!test_trace.string[0])
++		return;
++
++	if (!trace_file)
++	{
++		trace_file = fopen (test_trace.string, "w");
++		if (!trace_file)
++		{
++			Con_Printf ("TEST: cannot write trace \"%s\"\n", test_trace.string);
++			Cvar_Set ("test_trace", "");
++			return;
++		}
++
++		fprintf (trace_file,
++			"frame,time,px,py,pz,vx,vy,vz,yaw,pitch,roll,"
++			"health,armor,shells,nails,rockets,cells,weapon,items,flags,onground,waterlevel\n");
++	}
++
++	if (!sv.active || !sv_player)
++		return;
++
++	pl = sv_player;
++
++	fprintf (trace_file,
++		"%d,%.4f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
++		trace_frame++,
++		cl.time,
++		pl->v.origin[0], pl->v.origin[1], pl->v.origin[2],
++		pl->v.velocity[0], pl->v.velocity[1], pl->v.velocity[2],
++		cl.viewangles[YAW], cl.viewangles[PITCH], cl.viewangles[ROLL],
++		(int) pl->v.health,
++		(int) pl->v.armorvalue,
++		(int) pl->v.ammo_shells,
++		(int) pl->v.ammo_nails,
++		(int) pl->v.ammo_rockets,
++		(int) pl->v.ammo_cells,
++		(int) pl->v.weapon,
++		(int) pl->v.items,
++		(int) pl->v.flags,
++		((int) pl->v.flags & FL_ONGROUND) ? 1 : 0,
++		(int) pl->v.waterlevel);
++
++	fflush (trace_file);
++#endif
++}
+\ No newline at end of file
+diff --git a/Quake/test_input.h b/Quake/test_input.h
+new file mode 100644
+index 0000000..94ccbfa
+--- /dev/null
++++ b/Quake/test_input.h
+@@ -0,0 +1,26 @@
++/*
++test_input.h -- scripted input + state tracing for automated tests
++
++Not part of upstream QuakeSpasm. See tests/README.md.
++
++The script file is one command per client frame:
++    <yaw> <pitch> <roll> <forwardmove> <sidemove> <upmove> [buttons] [impulse]
++Blank lines and lines starting with '#' are skipped.
++
++The trace file is CSV, one row per client frame, written before that frame's
++command is simulated (so it lags the world by one frame).
++*/
++
++#ifndef TEST_INPUT_H
++#define TEST_INPUT_H
++
++/* quakedef.h must be included before this header (usercmd_t, qboolean) */
++
++void TestInput_Init (void);
++qboolean TestInput_Active (void);
++void TestInput_OverrideMove (usercmd_t *cmd);
++int TestInput_Buttons (void);
++int TestInput_Impulse (void);
++void TestInput_TraceFrame (void);
++
++#endif /* TEST_INPUT_H */
+\ No newline at end of file

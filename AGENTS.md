@@ -30,6 +30,7 @@ I do not code. You write ALL the code and give me exact, complete instructions.
 | Map | `cd slipgate/maps && qbsp -wadpath . starter.map && vis starter.bsp && light -extra4 starter.bsp` |
 | Engine | `cd vkQuake && meson setup build && ninja -C build` (needs the LunarG SDK env) |
 | Launch | `./slipgate/launch.sh` (basedir = repo root: `./id1` + `./slipgate`) |
+| Tests | `python3 tests/test_smoke.py` (see `tests/README.md`) |
 
 Non-obvious rules:
 
